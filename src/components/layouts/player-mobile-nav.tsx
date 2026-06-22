@@ -130,7 +130,7 @@ export function PlayerMobileNav() {
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-[var(--pc-hairline)] bg-[var(--pc-canvas)] p-5 text-center transition-all hover:border-[var(--pc-green-200)] hover:bg-[var(--pc-green-50)]/30 group cursor-pointer"
+                className="flex flex-col items-center justify-center gap-3 rounded-xl border border-[var(--pc-hairline)] bg-[var(--pc-canvas)] p-5 text-center transition-all hover:border-[var(--pc-green-200)] hover:bg-[var(--pc-green-50)]/30 group cursor-pointer"
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[var(--pc-green-100)] text-[var(--pc-green-800)] transition-transform group-hover:scale-110">
                   <CalendarPlus className="h-6 w-6" />
@@ -145,7 +145,7 @@ export function PlayerMobileNav() {
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-[var(--pc-hairline)] bg-[var(--pc-canvas)] p-5 text-center transition-all hover:border-[var(--pc-green-200)] hover:bg-[var(--pc-green-50)]/30 group cursor-pointer"
+                className="flex flex-col items-center justify-center gap-3 rounded-xl border border-[var(--pc-hairline)] bg-[var(--pc-canvas)] p-5 text-center transition-all hover:border-[var(--pc-green-200)] hover:bg-[var(--pc-green-50)]/30 group cursor-pointer"
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[var(--pc-tennis-soft)] text-[var(--pc-ink)] transition-transform group-hover:scale-110">
                   <Swords className="h-6 w-6" />

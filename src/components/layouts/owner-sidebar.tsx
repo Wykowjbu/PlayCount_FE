@@ -113,10 +113,11 @@ export function OwnerSidebar() {
         {menuItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
-          return (
+          
+          const linkEl = (
             <Link
-              key={item.href}
               href={item.href}
+              aria-label={item.name}
               className={`flex items-center gap-3 rounded-md py-2.5 px-3 text-sm font-medium transition-all group ${
                 isActive 
                   ? "border-l-2 border-[var(--pc-green-700)] bg-[var(--pc-green-50)] text-[var(--pc-ink)]" 
@@ -129,6 +130,29 @@ export function OwnerSidebar() {
               {!isCollapsed && <span className="truncate">{item.name}</span>}
             </Link>
           );
+
+          if (isCollapsed) {
+            return (
+              <Tooltip.Root key={item.href}>
+                <Tooltip.Trigger asChild>
+                  {linkEl}
+                </Tooltip.Trigger>
+                <Tooltip.Portal>
+                  <Tooltip.Content
+                    side="right"
+                    align="center"
+                    sideOffset={8}
+                    className="z-50 rounded-md bg-[var(--pc-ink)] px-2.5 py-1.5 text-xs font-mono text-[var(--pc-canvas)] shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)] animate-in fade-in zoom-in-95 duration-150"
+                  >
+                    {item.name}
+                    <Tooltip.Arrow className="fill-[var(--pc-ink)]" />
+                  </Tooltip.Content>
+                </Tooltip.Portal>
+              </Tooltip.Root>
+            );
+          }
+
+          return <React.Fragment key={item.href}>{linkEl}</React.Fragment>;
         })}
       </nav>
 

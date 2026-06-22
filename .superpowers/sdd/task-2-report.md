@@ -96,3 +96,21 @@ Chúng tôi đã giải quyết thành công các vấn đề layout còn sót l
 - SHA: `edc7d2e`
 - Subject: `fix(layout): resolve remaining tooltips and accessibility issues in navigation elements`
 
+## Fix Subagent Update (Task 2 Remaining Issues - Part 2)
+
+Chúng tôi đã giải quyết các vấn đề còn lại cuối cùng của Task 2 bao gồm:
+
+### 1. Thiếu Tooltips và Aria-Labels cho các Item trong Sidebar khi Thu nhỏ (Critical)
+- **Vấn đề**: Trong [owner-sidebar.tsx](file:///D:/Users/huynpde180519/fpt/SUMMER_26/PRN232/PlayCount_FE/src/components/layouts/owner-sidebar.tsx), khi sidebar bị thu nhỏ (`isCollapsed` là `true`), các thẻ `<Link>` điều hướng chỉ hiển thị icon (icon-only controls) nhưng chưa được bọc trong Radix Tooltip và thiếu nhãn `aria-label`.
+- **Chỉnh sửa**:
+  - Bổ sung thuộc tính `aria-label={item.name}` cho mỗi thẻ `<Link>` điều hướng.
+  - Khi sidebar bị thu nhỏ (`isCollapsed === true`), bọc mỗi liên kết bằng `Tooltip.Root`, `Tooltip.Trigger` và hiển thị nhãn tên tương ứng qua `Tooltip.Portal` và `Tooltip.Content` để hướng dẫn người dùng một cách trực quan.
+
+### 2. Điều chỉnh Bo góc (Border Radius) cho các Nút dạng Card (Minor)
+- **Vấn đề**: Trong [player-mobile-nav.tsx](file:///D:/Users/huynpde180519/fpt/SUMMER_26/PRN232/PlayCount_FE/src/components/layouts/player-mobile-nav.tsx), các nút bấm lựa chọn ("Đặt sân nhanh" và "Tạo trận đấu") bên trong Action Sheet đang sử dụng class `rounded-2xl` (bo góc 16px). Theo như ràng buộc thiết kế, các nút này được xem là card-like controls và cần tuân thủ "card radius 12px" (`rounded-xl`).
+- **Chỉnh sửa**: Thay đổi class bo góc của cả hai nút lựa chọn từ `rounded-2xl` thành `rounded-xl`.
+
+### 3. Kết quả xác minh (Verification)
+- Đã chạy kiểm thử `npx vitest run` thành công 100% với toàn bộ 12 test cases đều pass (bao gồm cả test suite `tests/layouts.test.tsx` và `tests/providers.test.tsx`).
+
+
