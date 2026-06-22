@@ -67,3 +67,32 @@ Kết quả output:
 ## Commit Information
 - SHA: `367aeb6`
 - Subject: `fix: refactor layout components with Radix UI, tooltips, active link color, and font adjustments`
+
+---
+
+## Fix Subagent Update (Layout Remaining Issues)
+
+Chúng tôi đã giải quyết thành công các vấn đề layout còn sót lại trong Task 2 bao gồm:
+
+### 1. Thêm Tooltip cho nút Đóng (Close Button) của Quick Action Sheet
+- **Vấn đề**: Trong [player-mobile-nav.tsx](file:///D:/Users/huynpde180519/fpt/SUMMER_26/PRN232/PlayCount_FE/src/components/layouts/player-mobile-nav.tsx), nút đóng (chứa icon `X`) chưa được bọc Radix Tooltip, vi phạm quy định "Mỗi điều khiển chỉ có icon phải có một Tooltip".
+- **Chỉnh sửa**: Đã bọc nút đóng bằng `Tooltip.Root` cùng với Tooltip content là `"Đóng"`.
+
+### 2. Thêm Tooltip cho nút Thu nhỏ/Mở rộng Sidebar (Sidebar Toggle Button)
+- **Vấn đề**: Trong [owner-sidebar.tsx](file:///D:/Users/huynpde180519/fpt/SUMMER_26/PRN232/PlayCount_FE/src/components/layouts/owner-sidebar.tsx), nút thu nhỏ/mở rộng sidebar (chứa icon Chevron) chưa được bọc Radix Tooltip.
+- **Chỉnh sửa**: Đã bọc nút này bằng `Tooltip.Root` sử dụng `Tooltip.Provider` và hiển thị Tooltip content động: `"Thu nhỏ menu"` / `"Mở rộng menu"` dựa trên trạng thái `isCollapsed` hiện tại.
+
+### 3. Cải thiện Accessibility & Styling cho nút Thêm mới nhanh (+) trên Mobile Nav
+- **Vấn đề**: Nút hành động trung tâm trên mobile nav sử dụng `aria-label="+"` (cần một tên mang tính mô tả rõ ràng) và sử dụng bóng đổ thô cứng `shadow-lg`.
+- **Chỉnh sửa**:
+  - Cập nhật thuộc tính `aria-label` thành `"Tạo mới nhanh"`.
+  - Thay thế class bóng đổ `shadow-lg` thành bóng đổ trôi nổi của hệ thống: `shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)]`.
+  - Cập nhật test case liên quan trong [layouts.test.tsx](file:///D:/Users/huynpde180519/fpt/SUMMER_26/PRN232/PlayCount_FE/tests/layouts.test.tsx) từ `screen.getByRole("button", { name: "+" })` thành `screen.getByRole("button", { name: "Tạo mới nhanh" })` để đảm bảo test suite chạy đúng.
+
+### 4. Kết quả chạy kiểm thử (Verification Results)
+- Tất cả các kiểm thử layout và provider (`npx vitest run`) đều vượt qua 100% thành công.
+
+## Fix Subagent Commit Information
+- SHA: `edc7d2e`
+- Subject: `fix(layout): resolve remaining tooltips and accessibility issues in navigation elements`
+
