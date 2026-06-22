@@ -1,26 +1,54 @@
+@import "../styles/tokens.css";
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: var(--pc-canvas);
+  --foreground: var(--pc-ink);
 }
 
-@theme inline {
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-pc-ink: var(--pc-ink);
+  --color-pc-body: var(--pc-body);
+  --color-pc-mute: var(--pc-mute);
+  --color-pc-faint: var(--pc-faint);
+  --color-pc-hairline: var(--pc-hairline);
+  --color-pc-hairline-soft: var(--pc-hairline-soft);
+  --color-pc-canvas: var(--pc-canvas);
+  --color-pc-surface: var(--pc-surface);
+
+  --color-pc-green-950: var(--pc-green-950);
+  --color-pc-green-900: var(--pc-green-900);
+  --color-pc-green-800: var(--pc-green-800);
+  --color-pc-green-700: var(--pc-green-700);
+  --color-pc-green-600: var(--pc-green-600);
+  --color-pc-green-500: var(--pc-green-500);
+  --color-pc-green-200: var(--pc-green-200);
+  --color-pc-green-100: var(--pc-green-100);
+  --color-pc-green-50: var(--pc-green-50);
+
+  --color-pc-tennis: var(--pc-tennis);
+  --color-pc-tennis-soft: var(--pc-tennis-soft);
+  --color-pc-tennis-ink: var(--pc-tennis-ink);
+
+  --color-pc-success: var(--pc-success);
+  --color-pc-success-soft: var(--pc-success-soft);
+  --color-pc-warning: var(--pc-warning);
+  --color-pc-warning-soft: var(--pc-warning-soft);
+  --color-pc-warning-deep: var(--pc-warning-deep);
+  --color-pc-error: var(--pc-error);
+  --color-pc-error-deep: var(--pc-error-deep);
+  --color-pc-info: var(--pc-info);
+  --color-pc-info-soft: var(--pc-info-soft);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--pc-canvas);
+  color: var(--pc-body);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
+

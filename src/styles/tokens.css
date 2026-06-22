@@ -1,0 +1,34 @@
+:root {
+  --pc-ink: #171717;
+  --pc-body: #4d4d4d;
+  --pc-mute: #8f8f8f;
+  --pc-faint: #a1a1a1;
+  --pc-hairline: #ebebeb;
+  --pc-hairline-soft: #f2f2f2;
+  --pc-canvas: #fafafa;
+  --pc-surface: #ffffff;
+
+  --pc-green-950: #0b2e13;
+  --pc-green-900: #14532d;
+  --pc-green-800: #166534;
+  --pc-green-700: #15803d;
+  --pc-green-600: #16a34a;
+  --pc-green-500: #22c55e;
+  --pc-green-200: #bbf7d0;
+  --pc-green-100: #dcfce7;
+  --pc-green-50: #f0fdf4;
+
+  --pc-tennis: #c7f227;
+  --pc-tennis-soft: #f2fbce;
+  --pc-tennis-ink: #171717;
+
+  --pc-success: #15803d;
+  --pc-success-soft: #dcfce7;
+  --pc-warning: #f5a623;
+  --pc-warning-soft: #ffefcf;
+  --pc-warning-deep: #ab570a;
+  --pc-error: #ee0000;
+  --pc-error-deep: #c50000;
+  --pc-info: #0070f3;
+  --pc-info-soft: #d3e5ff;
+}
