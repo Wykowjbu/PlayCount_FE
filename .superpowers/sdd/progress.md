@@ -2,8 +2,8 @@
 
 | Task | Status | Commits | Review Status | Note |
 |---|---|---|---|---|
-| Task 1 | todo | - | - | Khởi tạo dự án Next.js |
-| Task 2 | todo | - | - | Layout shell Player/Owner |
+| Task 1 | complete | 8159b39..903d881 | clean | Khởi tạo dự án Next.js |
+| Task 2 | complete | 56af491 | clean | Layout shell Player/Owner |
 | Task 3 | todo | - | - | Component primitives |
 | Task 4 | todo | - | - | Home & Search |
 | Task 5 | todo | - | - | Venue Detail & Slot Picker |
