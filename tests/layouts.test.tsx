@@ -53,7 +53,7 @@ describe("Layout Shell Components", () => {
 
     it("renders the central add action button", () => {
       render(<PlayerMobileNav />);
-      const addButton = screen.getByRole("button", { name: "+" });
+      const addButton = screen.getByRole("button", { name: "Tạo mới nhanh" });
       expect(addButton).toBeInTheDocument();
     });
   });

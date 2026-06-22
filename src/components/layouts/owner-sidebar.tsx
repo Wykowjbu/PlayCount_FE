@@ -15,6 +15,7 @@ import {
   MapPin,
   Home
 } from "lucide-react";
+import * as Tooltip from "@radix-ui/react-tooltip";
 
 export function OwnerSidebar() {
   const pathname = usePathname();
@@ -37,24 +38,40 @@ export function OwnerSidebar() {
   ];
 
   return (
-    <aside 
-      data-testid="owner-sidebar"
-      className={`relative hidden md:flex flex-col h-screen border-r border-[var(--pc-hairline)] bg-[var(--pc-surface)] transition-all duration-300 ${
-        isCollapsed ? "w-[72px]" : "w-[248px]"
-      }`}
-    >
-      {/* Upper Area: Venue Selector / Logo */}
-      <div className="flex flex-col gap-4 p-4 border-b border-[var(--pc-hairline)]">
-        
-        {/* Toggle Button */}
-        <button
-          type="button"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="absolute -right-3 top-5 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-[var(--pc-hairline)] bg-[var(--pc-surface)] text-[var(--pc-mute)] hover:text-[var(--pc-ink)] shadow-xs transition-transform cursor-pointer"
-          aria-label={isCollapsed ? "Mở rộng" : "Thu nhỏ"}
-        >
-          {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
-        </button>
+    <Tooltip.Provider>
+      <aside 
+        data-testid="owner-sidebar"
+        className={`relative hidden md:flex flex-col h-screen border-r border-[var(--pc-hairline)] bg-[var(--pc-surface)] transition-all duration-300 ${
+          isCollapsed ? "w-[72px]" : "w-[248px]"
+        }`}
+      >
+        {/* Upper Area: Venue Selector / Logo */}
+        <div className="flex flex-col gap-4 p-4 border-b border-[var(--pc-hairline)]">
+          
+          {/* Toggle Button */}
+          <Tooltip.Root>
+            <Tooltip.Trigger asChild>
+              <button
+                type="button"
+                onClick={() => setIsCollapsed(!isCollapsed)}
+                className="absolute -right-3 top-5 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-[var(--pc-hairline)] bg-[var(--pc-surface)] text-[var(--pc-mute)] hover:text-[var(--pc-ink)] shadow-xs transition-transform cursor-pointer"
+                aria-label={isCollapsed ? "Mở rộng" : "Thu nhỏ"}
+              >
+                {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
+              </button>
+            </Tooltip.Trigger>
+            <Tooltip.Portal>
+              <Tooltip.Content
+                side="right"
+                align="center"
+                sideOffset={8}
+                className="z-50 rounded-md bg-[var(--pc-ink)] px-2.5 py-1.5 text-xs font-mono text-[var(--pc-canvas)] shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)] animate-in fade-in zoom-in-95 duration-150"
+              >
+                {isCollapsed ? "Mở rộng menu" : "Thu nhỏ menu"}
+                <Tooltip.Arrow className="fill-[var(--pc-ink)]" />
+              </Tooltip.Content>
+            </Tooltip.Portal>
+          </Tooltip.Root>
 
         {/* Venue Selector */}
         <div className="flex flex-col gap-1">
@@ -134,6 +151,7 @@ export function OwnerSidebar() {
         )}
       </div>
 
-    </aside>
+      </aside>
+    </Tooltip.Provider>
   );
 }

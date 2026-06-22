@@ -47,8 +47,8 @@ export function PlayerMobileNav() {
                 <button
                   type="button"
                   onClick={() => setIsOpen(true)}
-                  className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--pc-green-800)] text-white shadow-lg transition-transform hover:scale-105 active:scale-95 cursor-pointer"
-                  aria-label="+"
+                  className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--pc-green-800)] text-white shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)] transition-transform hover:scale-105 active:scale-95 cursor-pointer"
+                  aria-label="Tạo mới nhanh"
                 >
                   <span className="text-2xl font-light leading-none">+</span>
                 </button>
@@ -100,13 +100,28 @@ export function PlayerMobileNav() {
                 Tạo mới nhanh
               </Dialog.Title>
               <Dialog.Close asChild>
-                <button
-                  type="button"
-                  className="rounded-full p-1 text-[var(--pc-mute)] hover:bg-[var(--pc-hairline-soft)] hover:text-[var(--pc-ink)] cursor-pointer"
-                  aria-label="Đóng"
-                >
-                  <X className="h-5 w-5" />
-                </button>
+                <Tooltip.Root>
+                  <Tooltip.Trigger asChild>
+                    <button
+                      type="button"
+                      className="rounded-full p-1 text-[var(--pc-mute)] hover:bg-[var(--pc-hairline-soft)] hover:text-[var(--pc-ink)] cursor-pointer"
+                      aria-label="Đóng"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </Tooltip.Trigger>
+                  <Tooltip.Portal>
+                    <Tooltip.Content
+                      side="top"
+                      align="center"
+                      sideOffset={8}
+                      className="z-50 rounded-md bg-[var(--pc-ink)] px-2.5 py-1.5 text-xs font-mono text-[var(--pc-canvas)] shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)] animate-in fade-in zoom-in-95 duration-150"
+                    >
+                      Đóng
+                      <Tooltip.Arrow className="fill-[var(--pc-ink)]" />
+                    </Tooltip.Content>
+                  </Tooltip.Portal>
+                </Tooltip.Root>
               </Dialog.Close>
             </div>
 
