@@ -112,4 +112,79 @@ describe('ResourceCalendar Component Tests', () => {
       expect(handleSlotClick).toHaveBeenCalledTimes(1);
     }
   });
+
+  it('clamps booking times to calendar boundaries (06:00 to 22:00)', () => {
+    const outOfBoundsBooking: BookingEvent[] = [
+      {
+        id: 'booking-out-1',
+        courtId: 'court-1',
+        courtName: 'Sân A',
+        title: 'Sân đặt sớm',
+        startTime: '04:00', // Before 06:00
+        endTime: '08:00',
+        status: 'confirmed',
+        userName: 'Nguyễn Văn A',
+      },
+      {
+        id: 'booking-out-2',
+        courtId: 'court-2',
+        courtName: 'Sân B',
+        title: 'Sân đặt trễ',
+        startTime: '21:00',
+        endTime: '23:30', // After 22:00
+        status: 'confirmed',
+        userName: 'Trần Thị B',
+      }
+    ];
+
+    render(
+      <ResourceCalendar
+        courts={mockCourts}
+        bookings={outOfBoundsBooking}
+        selectedDate={new Date()}
+      />
+    );
+
+    expect(screen.getByText('Sân đặt sớm')).toBeInTheDocument();
+    expect(screen.getByText('Sân đặt trễ')).toBeInTheDocument();
+  });
+
+  it('applies custom styling classes based on booking status', () => {
+    const statusBookings: BookingEvent[] = [
+      {
+        id: 'booking-status-1',
+        courtId: 'court-1',
+        courtName: 'Sân A',
+        title: 'Booking Chờ duyệt',
+        startTime: '08:00',
+        endTime: '10:00',
+        status: 'pending',
+        userName: 'Nguyễn Văn A',
+      },
+      {
+        id: 'booking-status-2',
+        courtId: 'court-2',
+        courtName: 'Sân B',
+        title: 'Booking Đã hủy',
+        startTime: '10:00',
+        endTime: '12:00',
+        status: 'cancelled',
+        userName: 'Trần Thị B',
+      }
+    ];
+
+    render(
+      <ResourceCalendar
+        courts={mockCourts}
+        bookings={statusBookings}
+        selectedDate={new Date()}
+      />
+    );
+
+    const pendingEl = screen.getByText('Booking Chờ duyệt').closest('.group');
+    const cancelledEl = screen.getByText('Booking Đã hủy').closest('.group');
+
+    expect(pendingEl?.className).toContain('bg-[var(--pc-warning-soft)]');
+    expect(cancelledEl?.className).toContain('border-dashed');
+  });
 });

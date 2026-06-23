@@ -73,7 +73,7 @@ export default function OwnerDashboard() {
   const points = weeklyRevenue.map((d, index) => {
     const x = padding + (index * (graphWidth / (weeklyRevenue.length - 1)));
     const y = chartHeight - padding - ((d.amount / maxAmount) * graphHeight);
-    return `${x},${y}`;
+    return x + "," + y;
   }).join(" ");
 
   return (
@@ -205,7 +205,7 @@ export default function OwnerDashboard() {
           <div className="flex-1 w-full flex items-center justify-center py-2">
             <svg 
               className="w-full h-full max-h-[220px]" 
-              viewBox=`0 0 ${chartWidth} ${chartHeight}`
+              viewBox="0 0 500 160"
               preserveAspectRatio="xMidYMid meet"
             >
               {/* Gridlines */}
@@ -215,8 +215,7 @@ export default function OwnerDashboard() {
 
               {/* Area under the line */}
               <path
-                d={`M${padding},${chartHeight - padding} ${points} L${chartWidth - padding},${chartHeight - padding} Z`}
-                d_fixed={`M${padding},${chartHeight - padding} ${points} L${chartWidth - padding},${chartHeight - padding} Z`}
+                d={"M" + padding + "," + (chartHeight - padding) + " " + points + " L" + (chartWidth - padding) + "," + (chartHeight - padding) + " Z"}
                 fill="url(#gradient)"
                 opacity="0.1"
               />
@@ -241,13 +240,24 @@ export default function OwnerDashboard() {
                       r="4"
                       className="fill-[var(--pc-green-600)] stroke-white stroke-2 group-hover/dot:r-6 transition-all duration-150"
                     />
+                    <rect
+                      x={x - 18}
+                      y={y - 20}
+                      width={36}
+                      height={14}
+                      rx={3}
+                      fill="white"
+                      stroke="var(--pc-hairline)"
+                      strokeWidth="1"
+                      className="hidden group-hover/dot:block pointer-events-none"
+                    />
                     <text
                       x={x}
-                      y={y - 8}
+                      y={y - 10}
                       textAnchor="middle"
-                      className="hidden group-hover/dot:block font-mono text-[9px] font-bold fill-[var(--pc-ink)] bg-white"
+                      className="hidden group-hover/dot:block font-mono text-[9px] font-bold fill-[var(--pc-ink)] pointer-events-none"
                     >
-                      {`${(d.amount / 1000000).toFixed(1)}M`}
+                      {((d.amount / 1000000).toFixed(1)) + "M"}
                     </text>
                   </g>
                 );
