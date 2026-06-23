@@ -37,3 +37,28 @@ Output:
 ## Commit Information
 - SHA: `7f99e6b`
 - Subject: `feat: complete Home and Search Venues screen with filters`
+
+## Accessibility and Design Token Alignment Fixes (Task Review Updates)
+Following reviewer feedback, the following fixes were implemented:
+
+1. **Accessibility (Icon-Only Controls)**:
+   - Wrapped the previous and next month change buttons in [date-picker.tsx](file:///C:/Users/hantu/.gemini/antigravity-cli/brain/0121db2e-86e2-41dc-8664-757f7c0ea692/.system_generated/worktrees/subagent-Player-Flow-Developer-self-d82a8dd0/src/components/playcourt/date-picker.tsx) inside Radix Tooltip components with explicit `aria-label="Tháng trước"` and `aria-label="Tháng sau"`.
+   - Wrapped the mobile filter close drawer button (X icon) in [venues/page.tsx](file:///C:/Users/hantu/.gemini/antigravity-cli/brain/0121db2e-86e2-41dc-8664-757f7c0ea692/.system_generated/worktrees/subagent-Player-Flow-Developer-self-d82a8dd0/src/app/(public)/venues/page.tsx) inside a Radix Tooltip component with `aria-label="Đóng bộ lọc"`.
+   - Setup global JSDOM Mock for `ResizeObserver` in `tests/setup.ts` to prevent Radix Tooltip rendering tests from throwing reference errors in test runs.
+
+2. **Typography (Geist Mono for Labels/Eyebrows)**:
+   - Applied `font-mono` to the search form labels "Khu vực" and "Môn thể thao" in [page.tsx](file:///C:/Users/hantu/.gemini/antigravity-cli/brain/0121db2e-86e2-41dc-8664-757f7c0ea692/.system_generated/worktrees/subagent-Player-Flow-Developer-self-d82a8dd0/src/app/(public)/page.tsx).
+   - Applied `font-mono` to the `DatePicker` input label in [date-picker.tsx](file:///C:/Users/hantu/.gemini/antigravity-cli/brain/0121db2e-86e2-41dc-8664-757f7c0ea692/.system_generated/worktrees/subagent-Player-Flow-Developer-self-d82a8dd0/src/components/playcourt/date-picker.tsx).
+   - Applied `font-mono` to the sidebar filter headings ("Môn thể thao", "Khoảng cách tối đa", "Khoảng giá", "Tiện ích") and the search status text ("Tìm thấy X sân phù hợp") in [venues/page.tsx](file:///C:/Users/hantu/.gemini/antigravity-cli/brain/0121db2e-86e2-41dc-8664-757f7c0ea692/.system_generated/worktrees/subagent-Player-Flow-Developer-self-d82a8dd0/src/app/(public)/venues/page.tsx).
+
+3. **Border Radius & Shadows**:
+   - Adjusted [date-picker.tsx](file:///C:/Users/hantu/.gemini/antigravity-cli/brain/0121db2e-86e2-41dc-8664-757f7c0ea692/.system_generated/worktrees/subagent-Player-Flow-Developer-self-d82a8dd0/src/components/playcourt/date-picker.tsx) popover panel radius to `rounded-[16px]` and updated its shadow to `shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)]`.
+   - Adjusted mobile bottom-sheet filter drawer radius to `rounded-t-[16px]` and updated its shadow to a light floating shadow with a hairline border (`shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)] border-t border-[var(--pc-hairline)]`) in [venues/page.tsx](file:///C:/Users/hantu/.gemini/antigravity-cli/brain/0121db2e-86e2-41dc-8664-757f7c0ea692/.system_generated/worktrees/subagent-Player-Flow-Developer-self-d82a8dd0/src/app/(public)/venues/page.tsx).
+
+4. **Minor Cleanup**:
+   - Updated the `onScheduleClick` on `VenueCard` inside the search results from an alert to a Next.js router transition: `router.push("/venues/" + venue.id)`.
+
+## Verification
+- Ran the test suite via Vitest successfully: All 34 tests in 5 files passed.
+- Commit hash: `f211d30`
+
