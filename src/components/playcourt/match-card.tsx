@@ -72,7 +72,7 @@ export function MatchCard({
   const countLabel = maxParticipants ? `${totalCount}/${maxParticipants}` : `${totalCount} người`;
 
   return (
-    <div className="border border-[var(--pc-hairline)] rounded-[6px] bg-white p-4 flex flex-col justify-between gap-4 shadow-sm hover:border-[var(--pc-faint)] transition-all duration-300 min-h-[160px]">
+    <div className="border border-[var(--pc-hairline)] rounded-[12px] bg-white p-4 flex flex-col justify-between gap-4 shadow-sm hover:border-[var(--pc-faint)] transition-all duration-300 min-h-[160px]">
       {/* Header: Sport & Status */}
       <div className="flex justify-between items-center gap-2">
         <span className="font-mono text-[10px] tracking-wider uppercase text-[var(--pc-mute)] font-semibold">

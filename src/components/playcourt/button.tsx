@@ -61,17 +61,11 @@ export function Button({ variant = 'AppPrimary', children, onClick, className = 
 
   const baseClasses = 'px-4 py-2 text-sm font-medium inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--pc-green-600)] focus-visible:ring-offset-2';
 
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (onClick) {
-      onClick(e);
-    }
-  };
-
   return (
     <button
       ref={buttonRef}
       onPointerDown={handlePointerDown}
-      onClick={handleClick}
+      onClick={onClick}
       className={`${baseClasses} ${variantClasses} ${className}`}
       {...props}
     >

@@ -19,7 +19,7 @@ export function VenueCard({
   onScheduleClick,
 }: VenueCardProps) {
   return (
-    <div className="border border-[var(--pc-hairline)] rounded-[6px] bg-white overflow-hidden shadow-sm flex flex-col hover:border-[var(--pc-faint)] transition-all group duration-300">
+    <div className="border border-[var(--pc-hairline)] rounded-[12px] bg-white overflow-hidden shadow-sm flex flex-col hover:border-[var(--pc-faint)] transition-all group duration-300">
       {/* 16:9 Aspect Ratio Image Container */}
       <div className="aspect-[16/9] overflow-hidden relative bg-neutral-50 border-b border-[var(--pc-hairline)]">
         {image ? (

@@ -122,6 +122,11 @@ describe('StatusBadge Primitive Tests', () => {
     let badge = screen.getByText('draft');
     expect(badge.className).toContain('bg-[var(--pc-hairline-soft)]');
     expect(badge.className).toContain('text-[var(--pc-body)]');
+
+    rerender(<StatusBadge status="completed" />);
+    badge = screen.getByText('completed');
+    expect(badge.className).toContain('bg-[var(--pc-hairline-soft)]');
+    expect(badge.className).toContain('text-[var(--pc-body)]');
   });
 });
 
