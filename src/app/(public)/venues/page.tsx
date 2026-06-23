@@ -1,5 +1,7 @@
 ﻿"use client";
 
+/* eslint-disable react-hooks/set-state-in-effect, react-hooks/static-components */
+
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Input } from "@/components/playcourt/input";

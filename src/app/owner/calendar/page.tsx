@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { type FormEvent, type ReactNode, useState, useMemo } from "react";
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -19,13 +19,13 @@ import { ResourceCalendar, BookingEvent, Court } from "@/components/owner/resour
 import { Button } from "@/components/playcourt/button";
 import { Input } from "@/components/playcourt/input";
 
-const mockCourts = [
+const mockCourts: Court[] = [
   { id: "court-1", name: "Sân Tennis Đất Nện 1" },
   { id: "court-2", name: "Sân Tennis Cứng 2" },
   { id: "court-3", name: "Sân Tennis Cứng 3" },
 ];
 
-const initialBookings = [
+const initialBookings: BookingEvent[] = [
   {
     id: "booking-101",
     courtId: "court-1",
@@ -76,7 +76,7 @@ const initialBookings = [
   },
 ];
 
-function QuickTooltip({ children, content }) {
+function QuickTooltip({ children, content }: { children: ReactNode; content: ReactNode }) {
   return (
     <Tooltip.Root>
       <Tooltip.Trigger asChild>
@@ -104,7 +104,7 @@ export default function OwnerCalendarPage() {
   const [selectedStatus, setSelectedStatus] = useState("all");
 
   // State for side panel (viewing booking details)
-  const [activeBooking, setActiveBooking] = useState(null);
+  const [activeBooking, setActiveBooking] = useState<BookingEvent | null>(null);
 
   // State for quick create booking dialog
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -155,11 +155,11 @@ export default function OwnerCalendarPage() {
   };
 
   // Event actions
-  const handleEventClick = (booking) => {
+  const handleEventClick = (booking: BookingEvent) => {
     setActiveBooking(booking);
   };
 
-  const handleSlotClick = (courtId, timeSlot) => {
+  const handleSlotClick = (courtId: string, timeSlot: string) => {
     setNewBookingCourt(courtId);
     setNewBookingTime(timeSlot);
     setNewBookingName("");
@@ -168,21 +168,21 @@ export default function OwnerCalendarPage() {
     setShowCreateModal(true);
   };
 
-  const handleConfirmBooking = (bookingId) => {
+  const handleConfirmBooking = (bookingId: string) => {
     setBookings(prev => 
       prev.map(b => b.id === bookingId ? { ...b, status: "confirmed" } : b)
     );
-    setActiveBooking(prev => prev && prev.id === bookingId ? { ...prev, status: "confirmed" } : prev);
+    setActiveBooking((prev) => prev && prev.id === bookingId ? { ...prev, status: "confirmed" } : prev);
   };
 
-  const handleCancelBooking = (bookingId) => {
+  const handleCancelBooking = (bookingId: string) => {
     setBookings(prev => 
       prev.map(b => b.id === bookingId ? { ...b, status: "cancelled" } : b)
     );
-    setActiveBooking(prev => prev && prev.id === bookingId ? { ...prev, status: "cancelled" } : prev);
+    setActiveBooking((prev) => prev && prev.id === bookingId ? { ...prev, status: "cancelled" } : prev);
   };
 
-  const handleSaveBooking = (e) => {
+  const handleSaveBooking = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!newBookingName || !newBookingTitle) return;
 
@@ -195,7 +195,7 @@ export default function OwnerCalendarPage() {
 
     const court = mockCourts.find(c => c.id === newBookingCourt);
 
-    const newEvent = {
+    const newEvent: BookingEvent = {
       id: "booking-manual-" + Date.now(),
       courtId: newBookingCourt,
       courtName: court ? court.name : "Sân đã chọn",

@@ -80,7 +80,7 @@ export default function VenueDetailPage({ params }: PageProps) {
   // Memoize generatedSlots based on venue
   const generatedSlots = useMemo(() => {
     if (!venue) return [];
-    const list = [];
+    const list: Slot[] = [];
     COURT_NAMES.forEach((court) => {
       TIME_SLOTS.forEach((time, index) => {
         const hour = parseInt(time.split(":")[0]);
@@ -114,9 +114,9 @@ export default function VenueDetailPage({ params }: PageProps) {
     return selectedSlots.reduce((sum, s) => sum + s.price, 0);
   }, [selectedSlots]);
 
-  const handleToggleQuickSlot = (slotId) => {
+  const handleToggleQuickSlot = (slotId: string) => {
     setSelectedSlotIds((prev) =>
-      prev.includes(slotId) ? prev.filter((id) => id !== slotId) : [...prev, slotId]
+      prev.includes(slotId) ? prev.filter((id: string) => id !== slotId) : [...prev, slotId]
     );
   };
 
@@ -153,7 +153,7 @@ export default function VenueDetailPage({ params }: PageProps) {
     setActiveImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
-  const toggleAccordion = (id) => {
+  const toggleAccordion = (id: string) => {
     setActiveAccordion((prev) => (prev === id ? null : id));
   };
 

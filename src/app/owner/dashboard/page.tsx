@@ -12,7 +12,7 @@ import {
   CheckCircle2,
   DollarSign
 } from "lucide-react";
-import { StatusBadge } from "@/components/playcourt/status-badge";
+import { StatusBadge, type StatusType } from "@/components/playcourt/status-badge";
 import { Button } from "@/components/playcourt/button";
 
 // Mock revenue data for the last 7 days
@@ -322,7 +322,7 @@ export default function OwnerDashboard() {
                       {task.user} ({task.phone})
                     </span>
                   </div>
-                  <StatusBadge status={task.status as any} className="scale-90 origin-top-right py-0.5" />
+                  <StatusBadge status={task.status as StatusType} className="scale-90 origin-top-right py-0.5" />
                 </div>
                 
                 <div className="flex items-center justify-between text-[11px] text-[var(--pc-body)] font-medium border-t border-[var(--pc-hairline-soft)] pt-2 mt-0.5">

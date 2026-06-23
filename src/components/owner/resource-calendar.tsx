@@ -41,11 +41,11 @@ export function ResourceCalendar({
   const hours = Array.from({ length: endHour - startHour + 1 }, (_, i) => startHour + i);
   const hourHeight = 64; // height in pixels
 
-  const formatHour = (hour) => {
+  const formatHour = (hour: number) => {
     return hour.toString().padStart(2, '0') + ":00";
   };
 
-  const parseTimeToMinutes = (timeStr) => {
+  const parseTimeToMinutes = (timeStr: string) => {
     const parts = timeStr.split(':');
     const h = parseInt(parts[0], 10);
     const m = parseInt(parts[1], 10);

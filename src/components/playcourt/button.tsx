@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 
@@ -97,4 +99,3 @@ export function Button({ variant = 'AppPrimary', children, onClick, className = 
     </button>
   );
 }
-
