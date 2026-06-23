@@ -6,7 +6,7 @@
 | Task 2 | complete | 56af491 | clean | Layout shell Player/Owner |
 | Task 3 | complete | 2511b91..49e592a | clean | Component primitives |
 | Task 4 | complete | 49e592a..db9e36a | clean | Home & Search |
-| Task 5 | todo | - | - | Venue Detail & Slot Picker |
+| Task 5 | complete | 359d10a..d9bc650 | clean | Venue Detail & Slot Picker |
 | Task 6 | todo | - | - | Checkout & Booking Detail |
 | Task 7 | todo | - | - | Matchmaking |
 | Task 8 | todo | - | - | Owner Dashboard & Calendar |
