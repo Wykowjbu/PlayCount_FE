@@ -7,7 +7,7 @@
 | Task 3 | complete | 2511b91..49e592a | clean | Component primitives |
 | Task 4 | complete | 49e592a..db9e36a | clean | Home & Search |
 | Task 5 | complete | 359d10a..ac9e281 | clean | Venue Detail & Slot Picker |
-| Task 6 | todo | - | - | Checkout & Booking Detail |
+| Task 6 | complete | uncommitted | self-verified | Checkout store, checkout form & booking detail |
 | Task 7 | todo | - | - | Matchmaking |
 | Task 8 | complete | 49e592a..80eabdb | clean | Owner Dashboard & Calendar |
 | Task 9 | todo | - | - | Owner KYC & Pricing |
