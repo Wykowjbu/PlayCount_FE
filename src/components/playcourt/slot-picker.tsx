@@ -59,7 +59,7 @@ export function SlotPicker({
             {courtNames.map((court) => {
               const colSpan = Math.floor(9 / courtNames.length);
               return (
-                <div key={court} className={`col-span-${colSpan}`}>
+                <div key={court} style={{ gridColumn: `span ${colSpan} / span ${colSpan}` }}>
                   {court}
                 </div>
               );
@@ -96,7 +96,9 @@ export function SlotPicker({
                       data-testid={`slot-${slot.id}`}
                       disabled={isBusy}
                       onClick={() => handleSlotClick(slot)}
-                      className={`col-span-${colSpan} h-10 text-xs rounded-[6px] transition-all relative overflow-hidden flex flex-col items-center justify-center select-none ${
+                      style={{ gridColumn: `span ${colSpan} / span ${colSpan}` }}
+                      aria-label={`${court}, ${time}: ${isBusy ? "Đã bận" : formatPrice(slot.price)}`}
+                      className={`h-10 text-xs rounded-[6px] transition-all relative overflow-hidden flex flex-col items-center justify-center select-none ${
                         isBusy
                           ? "bg-[var(--pc-hairline-soft)] text-[var(--pc-mute)] border border-[var(--pc-hairline)] cursor-not-allowed bg-[repeating-linear-gradient(45deg,var(--pc-hairline-soft),var(--pc-hairline-soft)_6px,var(--pc-hairline)_6px,var(--pc-hairline)_12px)] opacity-60"
                           : isSelected

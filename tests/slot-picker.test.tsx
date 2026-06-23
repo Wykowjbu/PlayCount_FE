@@ -87,4 +87,22 @@ describe("SlotPicker Component Tests", () => {
     fireEvent.click(continueBtn);
     expect(onContinue).toHaveBeenCalled();
   });
+
+  it("renders buttons with descriptive aria-label attributes", () => {
+    render(
+      <SlotPicker
+        courtNames={courtNames}
+        timeSlots={timeSlots}
+        slots={mockSlots}
+        selectedSlotIds={[]}
+        onSelectSlots={() => {}}
+      />
+    );
+
+    const freeSlot = screen.getByTestId("slot-c1-s1");
+    expect(freeSlot).toHaveAttribute("aria-label", "Court A, 06:00 - 07:00: 100.000đ");
+
+    const busySlot = screen.getByTestId("slot-c1-s2");
+    expect(busySlot).toHaveAttribute("aria-label", "Court A, 07:00 - 08:00: Đã bận");
+  });
 });

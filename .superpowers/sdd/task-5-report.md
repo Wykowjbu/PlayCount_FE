@@ -35,3 +35,17 @@ Output:
 ## Commit Information
 - SHA: `359d10a`
 - Subject: `feat: implement Venue Detail page and Court Slot Picker grid`
+
+## Review Fixes Applied
+1. **Quick Slots List in BookingPanel**:
+   - Added a "Danh sách slot nhanh" (Quick Slots List) component inside the sticky booking panel.
+   - Users can now click quick slot buttons to directly select/deselect slots, which syncs instantly with the main grid.
+   - Displayed selected slots summary details and calculated total price in real-time within the sticky sidebar itself.
+2. **Tailwind Dynamic Column Span Resolution**:
+   - Removed dynamic compile-time template strings `col-span-${colSpan}` in `slot-picker.tsx`.
+   - Used standard inline styles `style={{ gridColumn: 'span ' + colSpan + ' / span ' + colSpan }}` to safely support dynamic court counts.
+3. **Accessibility and Code Cleanup**:
+   - Added `aria-label` attribute on the slot buttons describing court name, time slot, and price/busy status.
+   - Extracted static configuration arrays (`COURT_NAMES`, `TIME_SLOTS`, and `MOCK_REVIEWS`) outside the component to prevent unnecessary memory allocations on re-renders.
+   - Wrapped calculations in `useMemo` for slots, selected slots, and total price calculation updates.
+   - Updated `tests/slot-picker.test.tsx` to add a test validating correct rendering of descriptive `aria-label` values.
