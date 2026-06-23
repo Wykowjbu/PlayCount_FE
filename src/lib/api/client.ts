@@ -118,6 +118,27 @@ export async function fetchVenues(filters: VenueFilters = {}): Promise<Venue[]> 
   }
 }
 
+export async function fetchVenueById(id: string): Promise<Venue | undefined> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/venues/${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      signal: AbortSignal.timeout(2000),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.warn("Backend API failed, falling back to mock venue details.", error);
+    return MOCK_VENUES.find((v) => v.id === id);
+  }
+}
+
 function filterMockData(data: Venue[], filters: VenueFilters): Venue[] {
   return data.filter((venue) => {
     if (filters.location && !venue.location.toLowerCase().includes(filters.location.toLowerCase())) {
