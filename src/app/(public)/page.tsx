@@ -75,7 +75,7 @@ export default function HomePage() {
           >
             {/* Location */}
             <div className="w-full flex-grow">
-              <label className="text-[10px] font-bold tracking-wider text-zinc-400 select-none uppercase block mb-1.5">
+              <label className="text-[10px] font-mono font-bold tracking-wider text-zinc-400 select-none uppercase block mb-1.5">
                 Khu vực
               </label>
               <Input
@@ -88,7 +88,7 @@ export default function HomePage() {
 
             {/* Sport Select */}
             <div className="w-full md:w-52 flex flex-col">
-              <label className="text-[10px] font-bold tracking-wider text-zinc-400 select-none uppercase block mb-1.5">
+              <label className="text-[10px] font-mono font-bold tracking-wider text-zinc-400 select-none uppercase block mb-1.5">
                 Môn thể thao
               </label>
               <select
@@ -111,7 +111,7 @@ export default function HomePage() {
                 onChange={setDate}
                 placeholder="Chọn ngày"
                 label="Ngày thi đấu"
-                className="[&>button]:bg-zinc-900/60 [&>button]:border-zinc-700/50 [&>button]:text-white [&>button]:h-[38px] [&>label]:text-zinc-400 [&>label]:font-bold [&>label]:tracking-wider [&>label]:text-[10px] [&>label]:uppercase [&>label]:mb-1.5"
+                className="[&>button]:bg-zinc-900/60 [&>button]:border-zinc-700/50 [&>button]:text-white [&>button]:h-[38px] [&>label]:text-zinc-400 [&>label]:font-mono [&>label]:font-bold [&>label]:tracking-wider [&>label]:text-[10px] [&>label]:uppercase [&>label]:mb-1.5"
               />
             </div>
 

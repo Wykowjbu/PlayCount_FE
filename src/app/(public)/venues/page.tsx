@@ -7,6 +7,7 @@ import { Button } from "@/components/playcourt/button";
 import { DatePicker } from "@/components/playcourt/date-picker";
 import { VenueCard } from "@/components/playcourt/venue-card";
 import { fetchVenues, Venue } from "@/lib/api/client";
+import * as Tooltip from "@radix-ui/react-tooltip";
 
 function VenuesSearchContent() {
   const router = useRouter();
@@ -99,7 +100,7 @@ function VenuesSearchContent() {
   const FilterFormElements = () => (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <span className="text-xs font-bold text-[var(--pc-ink)] tracking-wider uppercase">Môn thể thao</span>
+        <span className="text-xs font-mono font-bold text-[var(--pc-ink)] tracking-wider uppercase">Môn thể thao</span>
         <div className="flex flex-col gap-1.5">
           {sports.map((s) => (
             <label key={s} className="flex items-center gap-2 text-sm text-[var(--pc-body)] cursor-pointer select-none">
@@ -122,7 +123,7 @@ function VenuesSearchContent() {
       <hr className="border-[var(--pc-hairline)]" />
 
       <div className="flex flex-col gap-2">
-        <div className="flex justify-between items-center text-xs font-bold text-[var(--pc-ink)] uppercase tracking-wider">
+        <div className="flex justify-between items-center text-xs font-mono font-bold text-[var(--pc-ink)] uppercase tracking-wider">
           <span>Khoảng cách tối đa</span>
           <span className="text-[var(--pc-green-800)] font-extrabold">{maxDistance} km</span>
         </div>
@@ -144,7 +145,7 @@ function VenuesSearchContent() {
       <hr className="border-[var(--pc-hairline)]" />
 
       <div className="flex flex-col gap-2">
-        <span className="text-xs font-bold text-[var(--pc-ink)] tracking-wider uppercase">Khoảng giá (VND/giờ)</span>
+        <span className="text-xs font-mono font-bold text-[var(--pc-ink)] tracking-wider uppercase">Khoảng giá (VND/giờ)</span>
         <div className="flex items-center gap-2">
           <Input
             placeholder="Từ"
@@ -167,7 +168,7 @@ function VenuesSearchContent() {
       <hr className="border-[var(--pc-hairline)]" />
 
       <div className="flex flex-col gap-2">
-        <span className="text-xs font-bold text-[var(--pc-ink)] tracking-wider uppercase">Tiện ích</span>
+        <span className="text-xs font-mono font-bold text-[var(--pc-ink)] tracking-wider uppercase">Tiện ích</span>
         <div className="grid grid-cols-2 gap-2">
           {amenitiesList.map((amenity) => (
             <label
@@ -267,7 +268,7 @@ function VenuesSearchContent() {
 
         <main className="flex-1 flex flex-col gap-6">
           <div className="flex justify-between items-center border-b border-[var(--pc-hairline)] pb-3">
-            <span className="text-xs font-bold text-[var(--pc-mute)] uppercase tracking-wider">
+            <span className="text-xs font-mono font-bold text-[var(--pc-mute)] uppercase tracking-wider">
               {loading ? "Đang tìm sân..." : `Tìm thấy ${venues.length} sân phù hợp`}
             </span>
           </div>
@@ -292,7 +293,7 @@ function VenuesSearchContent() {
                   rating={venue.rating}
                   nearestSlot={venue.nearestSlot}
                   layout="wide"
-                  onScheduleClick={() => alert(`Xem lịch sân: ${venue.name}`)}
+                  onScheduleClick={() => router.push(`/venues/${venue.id}`)}
                 />
               ))}
             </div>
@@ -330,17 +331,35 @@ function VenuesSearchContent() {
       {isFilterDrawerOpen && (
         <div className="md:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-xs flex justify-end flex-col animate-in fade-in duration-200">
           <div className="absolute inset-0" onClick={() => setIsFilterDrawerOpen(false)} />
-          <div className="relative bg-white rounded-t-[20px] p-6 max-h-[85vh] overflow-y-auto flex flex-col gap-4 shadow-2xl z-50 animate-in slide-in-from-bottom duration-300">
+          <div className="relative bg-white rounded-t-[16px] p-6 max-h-[85vh] overflow-y-auto flex flex-col gap-4 shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)] border-t border-[var(--pc-hairline)] z-50 animate-in slide-in-from-bottom duration-300">
             <div className="flex justify-between items-center border-b border-[var(--pc-hairline)] pb-3">
               <span className="text-sm font-extrabold text-[var(--pc-ink)]">Bộ lọc nâng cao</span>
-              <button
-                onClick={() => setIsFilterDrawerOpen(false)}
-                className="p-1 rounded-full hover:bg-[var(--pc-hairline-soft)] text-[var(--pc-mute)] cursor-pointer"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <Tooltip.Provider>
+                <Tooltip.Root>
+                  <Tooltip.Trigger asChild>
+                    <button
+                      onClick={() => setIsFilterDrawerOpen(false)}
+                      aria-label="Đóng bộ lọc"
+                      className="p-1 rounded-full hover:bg-[var(--pc-hairline-soft)] text-[var(--pc-mute)] cursor-pointer"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </Tooltip.Trigger>
+                  <Tooltip.Portal>
+                    <Tooltip.Content
+                      side="bottom"
+                      align="center"
+                      sideOffset={4}
+                      className="z-50 rounded-md bg-[var(--pc-ink)] px-2.5 py-1.5 text-xs font-mono text-[var(--pc-canvas)] shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)] animate-in fade-in zoom-in-95 duration-150"
+                    >
+                      Đóng
+                      <Tooltip.Arrow className="fill-[var(--pc-ink)]" />
+                    </Tooltip.Content>
+                  </Tooltip.Portal>
+                </Tooltip.Root>
+              </Tooltip.Provider>
             </div>
 
             <div className="py-2">
