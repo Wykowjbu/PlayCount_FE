@@ -9,6 +9,6 @@
 | Task 5 | todo | - | - | Venue Detail & Slot Picker |
 | Task 6 | todo | - | - | Checkout & Booking Detail |
 | Task 7 | todo | - | - | Matchmaking |
-| Task 8 | todo | - | - | Owner Dashboard & Calendar |
+| Task 8 | complete | 49e592a..80eabdb | clean | Owner Dashboard & Calendar |
 | Task 9 | todo | - | - | Owner KYC & Pricing |
 | Task 10 | todo | - | - | Admin Console |
