@@ -2,9 +2,14 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { authService } from '@/lib/auth'
 
 export default function LoginPage() {
+  const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -13,8 +18,34 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Kết nối API login từ BE
-    console.log('Login:', formData)
+    setError('')
+    setIsLoading(true)
+
+    try {
+      const response = await authService.login({
+        identifier: formData.email,
+        password: formData.password,
+      })
+
+      if (response.success && response.data) {
+        const user = response.data.user
+
+        // Redirect dựa trên role
+        if (user.role === 'Owner') {
+          router.push('/owner/dashboard')
+        } else if (user.role === 'Admin') {
+          router.push('/admin/kyc')
+        } else {
+          router.push('/matches')
+        }
+      } else {
+        setError(response.message || 'Đăng nhập thất bại')
+      }
+    } catch (err) {
+      setError('Không thể kết nối đến server. Vui lòng thử lại.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -36,6 +67,13 @@ export default function LoginPage() {
       <p className="text-gray-500 mb-7">
         Tiếp tục đặt sân và tham gia trận đấu.
       </p>
+
+      {/* Error message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-800">
+          {error}
+        </div>
+      )}
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="grid gap-4">
@@ -99,9 +137,10 @@ export default function LoginPage() {
 
         <button
           type="submit"
-          className="w-full min-h-12 bg-green-900 text-white font-medium rounded-md hover:bg-green-950 active:translate-y-px transition-all"
+          disabled={isLoading}
+          className="w-full min-h-12 bg-green-900 text-white font-medium rounded-md hover:bg-green-950 active:translate-y-px transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Đăng nhập
+          {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
         </button>
 
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-xs text-gray-500">
