@@ -1,0 +1,2058 @@
+# Review package: 903d881..4740d07
+
+## Commits
+4740d07 docs(layout): update task 2 report with fix details and verification results
+edc7d2e fix(layout): resolve remaining tooltips and accessibility issues in navigation elements
+690741b docs: update task-2-report.md with fix details
+367aeb6 fix: refactor layout components with Radix UI, tooltips, active link color, and font adjustments
+5309d6e docs: update task 2 progress ledger
+56af491 feat: add player layout headers and owner sidebar
+
+## Files changed
+ .superpowers/sdd/progress.md                 |   4 +-
+ .superpowers/sdd/task-2-report.md            |  98 ++++
+ package.json                                 |   4 +
+ pnpm-lock.yaml                               | 786 +++++++++++++++++++++++++++
+ src/app/layout.tsx                           |   5 +-
+ src/components/layouts/layout-wrapper.tsx    |  48 ++
+ src/components/layouts/owner-sidebar.tsx     | 157 ++++++
+ src/components/layouts/player-header.tsx     | 229 ++++++++
+ src/components/layouts/player-mobile-nav.tsx | 164 ++++++
+ tests/layouts.test.tsx                       | 104 ++++
+ 10 files changed, 1596 insertions(+), 3 deletions(-)
+
+## Diff
+diff --git a/.superpowers/sdd/progress.md b/.superpowers/sdd/progress.md
+index ac92ad5..a3a2746 100644
+--- a/.superpowers/sdd/progress.md
++++ b/.superpowers/sdd/progress.md
+@@ -1,14 +1,14 @@
+ # PlayCourt Frontend SDD Progress Ledger
+ 
+ | Task | Status | Commits | Review Status | Note |
+ |---|---|---|---|---|
+-| Task 1 | todo | - | - | Khởi tạo dự án Next.js |
+-| Task 2 | todo | - | - | Layout shell Player/Owner |
++| Task 1 | complete | 8159b39..903d881 | clean | Khởi tạo dự án Next.js |
++| Task 2 | complete | 56af491 | clean | Layout shell Player/Owner |
+ | Task 3 | todo | - | - | Component primitives |
+ | Task 4 | todo | - | - | Home & Search |
+ | Task 5 | todo | - | - | Venue Detail & Slot Picker |
+ | Task 6 | todo | - | - | Checkout & Booking Detail |
+ | Task 7 | todo | - | - | Matchmaking |
+ | Task 8 | todo | - | - | Owner Dashboard & Calendar |
+ | Task 9 | todo | - | - | Owner KYC & Pricing |
+ | Task 10 | todo | - | - | Admin Console |
+diff --git a/.superpowers/sdd/task-2-report.md b/.superpowers/sdd/task-2-report.md
+new file mode 100644
+index 0000000..e75b41c
+--- /dev/null
++++ b/.superpowers/sdd/task-2-report.md
+@@ -0,0 +1,98 @@
++# Task 2 Report: Global Layout Shell (Header & Navigation)
++
++## Files Changed
++- `src/components/layouts/player-header.tsx`: Header desktop có logo, navigation links, search, notifications list, và user profile dropdown menu.
++- `src/components/layouts/player-mobile-nav.tsx`: Bottom navigation bar dành cho mobile, gồm các tabs và nút action "+" chính giữa mở action sheet để đặt sân hoặc tạo trận.
++- `src/components/layouts/owner-sidebar.tsx`: Sidebar dành cho chủ sân (Owner) có thể thu gọn/mở rộng, hỗ trợ chọn venue địa điểm quản lý qua select dropdown.
++- `src/components/layouts/layout-wrapper.tsx`: Component wrapper động ở client-side giúp tự động chuyển đổi giữa Player layout và Pro Owner/Admin layout dựa trên route bắt đầu bằng `/owner` hoặc `/admin`.
++- `src/app/layout.tsx`: Tích hợp `LayoutWrapper` để bao bọc toàn bộ children của Next.js ứng dụng.
++- `tests/layouts.test.tsx`: Bộ test suite gồm 10 unit tests kiểm tra cấu trúc HTML semantic (header, nav, aside), testid định vị, mock navigation, và sự chuyển đổi layout chính xác của `LayoutWrapper`.
++
++## Testing Evidence
++Chạy test suite thành công qua Vitest:
++```bash
++npx vitest run
++```
++Kết quả output:
++```
++ RUN  v4.1.9 D:/Users/huynpde180519/fpt/SUMMER_26/PRN232/PlayCount_FE
++
++ ✓ tests/layouts.test.tsx (10 tests) 371ms
++ ✓ tests/providers.test.tsx (2 tests) 39ms
++
++ Test Files  2 passed (2)
++      Tests  12 passed (12)
++   Start at  23:15:34
++   Duration  3.96s (transform 292ms, setup 580ms, import 1.96s, tests 410ms, environment 4.02s)
++```
++
++## Self-Review Findings
++1. **Design Tokens & Theme Accents**: Sử dụng chính xác các biến CSS custom từ `tokens.css` như `var(--pc-green-800)`, `var(--pc-tennis)`, `var(--pc-canvas)`, `var(--pc-surface)`.
++2. **Next.js App Router Integration**: Root Layout vẫn giữ nguyên cấu trúc Server Component nhằm đảm bảo SEO (metadata). Việc chuyển đổi layout theo route được ủy quyền thông qua Client Component wrapper `LayoutWrapper` sử dụng `usePathname()`, giúp giải quyết mâu thuẫn hoàn hảo.
++3. **Interactive Components**: Các dropdown menu (avatar), notification list (popover) và mobile action sheet (overlay) đều được thiết kế tối giản, sạch sẽ bằng các state React và các transition class Tailwind CSS, hoạt động tốt trong cả jsdom environment của Vitest mà không bị lỗi thư viện animation.
++4. **Icons Compatibility**: Thay thế một số icons mới hơn bằng các icons cũ/tương đương từ `lucide-react` để đảm bảo tương thích 100% với phiên bản `1.21.0` có sẵn trong dự án.
++
++## Fixes and Refactor (Critical & Important Issues)
++
++Để giải quyết các vấn đề về Code Quality và Spec Compliance, các chỉnh sửa sau đã được thực hiện và commit thành công:
++
++### 1. Radix UI Integration (Critical)
++- Thay thế các dropdown, popover và mobile sheet sử dụng React state trơn trước đây bằng các Radix UI primitives:
++  - `@radix-ui/react-dropdown-menu` cho Menu tài khoản ở `player-header.tsx`.
++  - `@radix-ui/react-popover` cho Popover Thông báo ở `player-header.tsx`.
++  - `@radix-ui/react-dialog` cho Mobile Quick Action Sheet ở `player-mobile-nav.tsx`.
++  - `@radix-ui/react-tooltip` cho các Tooltips.
++
++### 2. Tooltips on Icon-Only Controls (Critical)
++- Đã bọc các nút chỉ có icon (Tìm kiếm, Thông báo và nút hành động "+" trung tâm trên mobile) trong `<Tooltip.Root>` kèm các nhãn `aria-label` tương ứng.
++
++### 3. Active Link Color (Critical)
++- Chuyển màu gạch chân của active link trong `player-header.tsx` từ màu xanh đậm cũ sang màu xanh tennis thương hiệu: `bg-[var(--pc-tennis)]`.
++
++### 4. Font Family for Eyebrows & Labels (Important)
++- Áp dụng class `font-mono` cho các labels kỹ thuật và captions trong `owner-sidebar.tsx` và `player-header.tsx`:
++  - Nhãn `"Địa điểm quản lý"` và caption `"Owner Dashboard"` trong `owner-sidebar.tsx`.
++  - Nhãn `"Tài khoản"` và thời gian trong danh sách thông báo (`notif.time`) trong `player-header.tsx`.
++  - Đồng thời bổ sung `font-mono` cho các description text phụ trên mobile nav sheet.
++
++### 5. Border Radius & Shadows (Important)
++- Đổi radius các card dropdown/popover thành `rounded-2xl` (16px).
++- Đổi radius các input/controls (như select dropdown venue, các menu items, các icon container) thành `rounded-md` (6px).
++- Thay thế bóng đổ nặng (`shadow-lg`, `shadow-2xl`) bằng floating shadow tinh tế: `shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)]`.
++
++### 6. Verification Results
++- Chạy lại toàn bộ test suite layout thành công (`tests/layouts.test.tsx` và `tests/providers.test.tsx` đều pass 100%).
++- Đã build thành công dự án bằng Next.js (Turbopack) mà không phát sinh lỗi TypeScript hay biên dịch nào.
++
++## Commit Information
++- SHA: `367aeb6`
++- Subject: `fix: refactor layout components with Radix UI, tooltips, active link color, and font adjustments`
++
++---
++
++## Fix Subagent Update (Layout Remaining Issues)
++
++Chúng tôi đã giải quyết thành công các vấn đề layout còn sót lại trong Task 2 bao gồm:
++
++### 1. Thêm Tooltip cho nút Đóng (Close Button) của Quick Action Sheet
++- **Vấn đề**: Trong [player-mobile-nav.tsx](file:///D:/Users/huynpde180519/fpt/SUMMER_26/PRN232/PlayCount_FE/src/components/layouts/player-mobile-nav.tsx), nút đóng (chứa icon `X`) chưa được bọc Radix Tooltip, vi phạm quy định "Mỗi điều khiển chỉ có icon phải có một Tooltip".
++- **Chỉnh sửa**: Đã bọc nút đóng bằng `Tooltip.Root` cùng với Tooltip content là `"Đóng"`.
++
++### 2. Thêm Tooltip cho nút Thu nhỏ/Mở rộng Sidebar (Sidebar Toggle Button)
++- **Vấn đề**: Trong [owner-sidebar.tsx](file:///D:/Users/huynpde180519/fpt/SUMMER_26/PRN232/PlayCount_FE/src/components/layouts/owner-sidebar.tsx), nút thu nhỏ/mở rộng sidebar (chứa icon Chevron) chưa được bọc Radix Tooltip.
++- **Chỉnh sửa**: Đã bọc nút này bằng `Tooltip.Root` sử dụng `Tooltip.Provider` và hiển thị Tooltip content động: `"Thu nhỏ menu"` / `"Mở rộng menu"` dựa trên trạng thái `isCollapsed` hiện tại.
++
++### 3. Cải thiện Accessibility & Styling cho nút Thêm mới nhanh (+) trên Mobile Nav
++- **Vấn đề**: Nút hành động trung tâm trên mobile nav sử dụng `aria-label="+"` (cần một tên mang tính mô tả rõ ràng) và sử dụng bóng đổ thô cứng `shadow-lg`.
++- **Chỉnh sửa**:
++  - Cập nhật thuộc tính `aria-label` thành `"Tạo mới nhanh"`.
++  - Thay thế class bóng đổ `shadow-lg` thành bóng đổ trôi nổi của hệ thống: `shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)]`.
++  - Cập nhật test case liên quan trong [layouts.test.tsx](file:///D:/Users/huynpde180519/fpt/SUMMER_26/PRN232/PlayCount_FE/tests/layouts.test.tsx) từ `screen.getByRole("button", { name: "+" })` thành `screen.getByRole("button", { name: "Tạo mới nhanh" })` để đảm bảo test suite chạy đúng.
++
++### 4. Kết quả chạy kiểm thử (Verification Results)
++- Tất cả các kiểm thử layout và provider (`npx vitest run`) đều vượt qua 100% thành công.
++
++## Fix Subagent Commit Information
++- SHA: `edc7d2e`
++- Subject: `fix(layout): resolve remaining tooltips and accessibility issues in navigation elements`
++
+diff --git a/package.json b/package.json
+index e005209..d4da39c 100644
+--- a/package.json
++++ b/package.json
+@@ -5,20 +5,24 @@
+   "scripts": {
+     "dev": "next dev",
+     "build": "next build",
+     "start": "next start",
+     "lint": "eslint",
+     "test": "vitest run",
+     "test:watch": "vitest"
+   },
+   "dependencies": {
+     "@hookform/resolvers": "^5.4.0",
++    "@radix-ui/react-dialog": "^1.1.17",
++    "@radix-ui/react-dropdown-menu": "^2.1.18",
++    "@radix-ui/react-popover": "^1.1.17",
++    "@radix-ui/react-tooltip": "^1.2.10",
+     "@tanstack/react-query": "^5.101.0",
+     "date-fns": "^4.4.0",
+     "lucide-react": "^1.21.0",
+     "motion": "^12.40.0",
+     "next": "16.2.9",
+     "react": "19.2.4",
+     "react-dom": "19.2.4",
+     "react-hook-form": "^7.80.0",
+     "zod": "^4.4.3",
+     "zustand": "^5.0.14"
+diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
+index d7f8ef7..788c503 100644
+--- a/pnpm-lock.yaml
++++ b/pnpm-lock.yaml
+@@ -4,20 +4,32 @@ settings:
+   autoInstallPeers: true
+   excludeLinksFromLockfile: false
+ 
+ importers:
+ 
+   .:
+     dependencies:
+       '@hookform/resolvers':
+         specifier: ^5.4.0
+         version: 5.4.0(react-hook-form@7.80.0(react@19.2.4))
++      '@radix-ui/react-dialog':
++        specifier: ^1.1.17
++        version: 1.1.17(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-dropdown-menu':
++        specifier: ^2.1.18
++        version: 2.1.18(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-popover':
++        specifier: ^1.1.17
++        version: 1.1.17(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-tooltip':
++        specifier: ^1.2.10
++        version: 1.2.10(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+       '@tanstack/react-query':
+         specifier: ^5.101.0
+         version: 5.101.0(react@19.2.4)
+       date-fns:
+         specifier: ^4.4.0
+         version: 4.4.0
+       lucide-react:
+         specifier: ^1.21.0
+         version: 1.21.0(react@19.2.4)
+       motion:
+@@ -275,20 +287,35 @@ packages:
+ 
+   '@exodus/bytes@1.15.1':
+     resolution: {integrity: sha512-S6mL0yNB/Abt9Ei4tq8gDhcczc4S3+vQ4ra7vxnAf+YHC02srtqxKKZghx2Dq6p0e66THKwR6r8N6P95wEty7Q==}
+     engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
+     peerDependencies:
+       '@noble/hashes': ^1.8.0 || ^2.0.0
+     peerDependenciesMeta:
+       '@noble/hashes':
+         optional: true
+ 
++  '@floating-ui/core@1.7.5':
++    resolution: {integrity: sha512-1Ih4WTWyw0+lKyFMcBHGbb5U5FtuHJuujoyyr5zTaWS5EYMeT6Jb2AuDeftsCsEuchO+mM2ij5+q9crhydzLhQ==}
++
++  '@floating-ui/dom@1.7.6':
++    resolution: {integrity: sha512-9gZSAI5XM36880PPMm//9dfiEngYoC6Am2izES1FF406YFsjvyBMmeJ2g4SAju3xWwtuynNRFL2s9hgxpLI5SQ==}
++
++  '@floating-ui/react-dom@2.1.8':
++    resolution: {integrity: sha512-cC52bHwM/n/CxS87FH0yWdngEZrjdtLW/qVruo68qg+prK7ZQ4YGdut2GyDVpoGeAYe/h899rVeOVm6Oi40k2A==}
++    peerDependencies:
++      react: '>=16.8.0'
++      react-dom: '>=16.8.0'
++
++  '@floating-ui/utils@0.2.11':
++    resolution: {integrity: sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg==}
++
+   '@hookform/resolvers@5.4.0':
+     resolution: {integrity: sha512-EIsqr/t/qbinPIhGjMdtvutIN1Kk4uwbROE9/UQ93CAVGR7GkA7Y92+fX80OzXi/OB67jVFYwKGO1WzkxmkFZw==}
+     peerDependencies:
+       react-hook-form: ^7.55.0
+ 
+   '@humanfs/core@0.19.2':
+     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
+     engines: {node: '>=18.18.0'}
+ 
+   '@humanfs/node@0.16.8':
+@@ -552,20 +579,338 @@ packages:
+     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
+     engines: {node: '>= 8'}
+ 
+   '@nolyfill/is-core-module@1.0.39':
+     resolution: {integrity: sha512-nn5ozdjYQpUCZlWGuxcJY/KpxkWQs4DcbMCmKojjyrYDEAGy4Ce19NN4v5MduafTwJlbKc99UA8YhSVqq9yPZA==}
+     engines: {node: '>=12.4.0'}
+ 
+   '@oxc-project/types@0.133.0':
+     resolution: {integrity: sha512-KzkdCd6Uxqnf6l3HOw1xfatAlUURA0g14cvBYFyJ5SaNOQbOUvBr9PKArcPcrNIeRsBdgcUzOGrhKveVpvOIGA==}
+ 
++  '@radix-ui/primitive@1.1.4':
++    resolution: {integrity: sha512-7AdCK9PQyiljKoBDbN8OuctCbd/esdwZPQ8RtOE3SsyQtUpiPb+ND75q0jEhC1m1ecBI0MFNeLJvwIh9iKHRcQ==}
++
++  '@radix-ui/react-arrow@1.1.10':
++    resolution: {integrity: sha512-j2VTDz1vgCsmuG0k5lBfOcM8n5JPFqZBcMryasFjHYMhwxYL5SRUV5lMSUpRdNtw3D/Sv8pzJtrlAgkssYSsQQ==}
++    peerDependencies:
++      '@types/react': '*'
++      '@types/react-dom': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++      '@types/react-dom':
++        optional: true
++
++  '@radix-ui/react-collection@1.1.10':
++    resolution: {integrity: sha512-IVVz4EvBcKjrzKgof714qDnz/SzQAkLA2Emh5edlHbgcE6fNd3Un6CJLlaYcnm8N4JmAtzQgse4dOKxcD2yc9g==}
++    peerDependencies:
++      '@types/react': '*'
++      '@types/react-dom': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++      '@types/react-dom':
++        optional: true
++
++  '@radix-ui/react-compose-refs@1.1.3':
++    resolution: {integrity: sha512-rYOP8OMnuuPMQF1uhPVlGNcCDlkokKqGFE3JcxFViIkAXP7EvFWUliJAstrapypaBLJNHbZL6jGhbVDGTwmVhA==}
++    peerDependencies:
++      '@types/react': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++
++  '@radix-ui/react-context@1.1.4':
++    resolution: {integrity: sha512-QwH4PO5urrbO+FaGd5Aglg+YJgWTyyuZ3g/6mKvsqraLkglDdckw9JafgL5McL5VEJ6EPNduPaT3ZE9BttDAqg==}
++    peerDependencies:
++      '@types/react': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++
++  '@radix-ui/react-dialog@1.1.17':
++    resolution: {integrity: sha512-TDTYmpdq8dI2+Xgvgj9AJ8Ghqq+Eph/TRVEdaFQPDItIY+6QSkU7MJMeevw1568Yw/2Ijz8BTphPSP2XejKphw==}
++    peerDependencies:
++      '@types/react': '*'
++      '@types/react-dom': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++      '@types/react-dom':
++        optional: true
++
++  '@radix-ui/react-direction@1.1.2':
++    resolution: {integrity: sha512-C3vFhbyi4SW3PmbAi6Awpu4OzJtd0MxGurvSsYtr7p7nM8RNB3VAF3CUmnp2j50knpkrRcB7+ycVXzgLgF6yNA==}
++    peerDependencies:
++      '@types/react': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++
++  '@radix-ui/react-dismissable-layer@1.1.13':
++    resolution: {integrity: sha512-2v+zNAWWe0ySxgC0D0yeXMPQ23xZVgXZTerTz+JKlmdRj6gfTqmCcR29jb6d290DezXPGgruHWDX/vYUebtErg==}
++    peerDependencies:
++      '@types/react': '*'
++      '@types/react-dom': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++      '@types/react-dom':
++        optional: true
++
++  '@radix-ui/react-dropdown-menu@2.1.18':
++    resolution: {integrity: sha512-PZGV82gFk0WltDRI//SsG28ZIjlo9ANTmoNYg0jLNzXXiDsAy5PkOOYQaVD1pPxY6t7gxffb1QMD6qaUvsBZdw==}
++    peerDependencies:
++      '@types/react': '*'
++      '@types/react-dom': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++      '@types/react-dom':
++        optional: true
++
++  '@radix-ui/react-focus-guards@1.1.4':
++    resolution: {integrity: sha512-cot/aB/mOm0IYVYTTmQcEEK1M48lZWi8FlYe5nDPQQ8NYZUlXEFgncJ9p2Kzer3RKSrY7cTTpEMLZKNo9QoP5Q==}
++    peerDependencies:
++      '@types/react': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++
++  '@radix-ui/react-focus-scope@1.1.10':
++    resolution: {integrity: sha512-Fas/lXQqhVvqwAb64s5RFeHiHYElZ6SUQbZaNd6EkfhP/Al7wTIQ9WIR4QVX475tlu5yFCEdDcJH6/UwsZjMWw==}
++    peerDependencies:
++      '@types/react': '*'
++      '@types/react-dom': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++      '@types/react-dom':
++        optional: true
++
++  '@radix-ui/react-id@1.1.2':
++    resolution: {integrity: sha512-orBC88futVpqCmhX1p4cvquNHsELQ+w+vBJnuj3ftETI5bJb0bZn3Tqu3SWN2IOcPycTnMGnhwoermvISt72sA==}
++    peerDependencies:
++      '@types/react': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++
++  '@radix-ui/react-menu@2.1.18':
++    resolution: {integrity: sha512-lj8Rxjtn6zJq1oSbE/uDtAwCbB9BnxgHD+8MwJMuTh6u1dPamYhW9iuELr/Z8d0D/UysFblYYHeBPwi7T4k0YQ==}
++    peerDependencies:
++      '@types/react': '*'
++      '@types/react-dom': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++      '@types/react-dom':
++        optional: true
++
++  '@radix-ui/react-popover@1.1.17':
++    resolution: {integrity: sha512-/YSAOdJ7YJvdn7bn5sdSx2egW+SKY+u7O5RyAVs94Ymrg2fg5QTSFPMRkzvhGyFuE4/qsmPBdrwYoZMZh/4f+g==}
++    peerDependencies:
++      '@types/react': '*'
++      '@types/react-dom': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++      '@types/react-dom':
++        optional: true
++
++  '@radix-ui/react-popper@1.3.1':
++    resolution: {integrity: sha512-bhnq/0DEPTi2lsOD3J5rTL65qUKHbKbhqHsmN9TMiclSXpipi651ooUKPPp6G5lF/WiHBdn1s0Wuqsn+myVAvw==}
++    peerDependencies:
++      '@types/react': '*'
++      '@types/react-dom': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++      '@types/react-dom':
++        optional: true
++
++  '@radix-ui/react-portal@1.1.12':
++    resolution: {integrity: sha512-m309havGzsjLHHaIX50G5PlvRs3xkgPCsGk/5PTvYm8D5q33yG0J7w/712PTOhid7NTaFETtnSXjngHQavvhVw==}
++    peerDependencies:
++      '@types/react': '*'
++      '@types/react-dom': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++      '@types/react-dom':
++        optional: true
++
++  '@radix-ui/react-presence@1.1.6':
++    resolution: {integrity: sha512-zdTk4PlUO0E18HnZ3wYbW0KkJJxWCdiNYp6g6X1PtONFhxVkg01vliTJAmwIszU6mHiyBOoW9P0rAugl5/hULQ==}
++    peerDependencies:
++      '@types/react': '*'
++      '@types/react-dom': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++      '@types/react-dom':
++        optional: true
++
++  '@radix-ui/react-primitive@2.1.6':
++    resolution: {integrity: sha512-wetd0QI77DbvrPpTAvH1SqOxsYF2wZe5TNxqwOd5Ty4XDpV3dpV0s8K/1MGMJBeY5o7lg8ub5VIt1Ub+yVen6g==}
++    peerDependencies:
++      '@types/react': '*'
++      '@types/react-dom': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++      '@types/react-dom':
++        optional: true
++
++  '@radix-ui/react-roving-focus@1.1.13':
++    resolution: {integrity: sha512-9gkwneI0guf8JDmrFxPjJF6Ozzgioyw+/lonYNCwefS9ZHA05er0BVHiXr+LbWGHxUfczvMY6G1oiZZi1VzjRw==}
++    peerDependencies:
++      '@types/react': '*'
++      '@types/react-dom': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++      '@types/react-dom':
++        optional: true
++
++  '@radix-ui/react-slot@1.3.0':
++    resolution: {integrity: sha512-MojKku4U/miO8Av4Dkb+ctMAQx7JmY96LmtDQlAarCRtd7rN52QCSzBF+XAvr5S6coSVj9HEPBgHAHKEJVk/WA==}
++    peerDependencies:
++      '@types/react': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++
++  '@radix-ui/react-tooltip@1.2.10':
++    resolution: {integrity: sha512-NlNe8D0dWEpVfXFli90IO6X07Josx/b1iu98tDnx9Xv0HT4wLIL+m2VOheMHhK7qbp2HoTBqALEFzGyZs/levw==}
++    peerDependencies:
++      '@types/react': '*'
++      '@types/react-dom': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++      '@types/react-dom':
++        optional: true
++
++  '@radix-ui/react-use-callback-ref@1.1.2':
++    resolution: {integrity: sha512-xCso9j1/u8sEgP1RNHjFrXJLApL8LiqOkI1R4ywuN00rxWdYg4oQXuwKLS3i0j5NWLromUD27/4nlxj2UFVvIw==}
++    peerDependencies:
++      '@types/react': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++
++  '@radix-ui/react-use-controllable-state@1.2.3':
++    resolution: {integrity: sha512-PLzC90MS+ReootmjC597dvopoelpZ8Q61HJkDXZSExitIq7PL55vHNnesAHwguHK0aPfBnpdNzQtv1uliaqQrA==}
++    peerDependencies:
++      '@types/react': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++
++  '@radix-ui/react-use-effect-event@0.0.3':
++    resolution: {integrity: sha512-6c8ZqvPTWILEKnyVkP53EGRCcpnJiKTC21sS/6R1GF5xKyHJJWQEPfkqlcgUkdRQivd6tb23abUwe4ngWmY0JA==}
++    peerDependencies:
++      '@types/react': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++
++  '@radix-ui/react-use-escape-keydown@1.1.2':
++    resolution: {integrity: sha512-2uVLvLjgO7NZCWw01/FdqRwmA42J0BcjPMUCA+koFEOAb+zjqIP7SiFz/7zWPrKnVmSqr76Omq2ALyCuX4dhLw==}
++    peerDependencies:
++      '@types/react': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++
++  '@radix-ui/react-use-layout-effect@1.1.2':
++    resolution: {integrity: sha512-jrBWOxZITuGcnjRCM2t2U5ZPkCLxD+Ym6DjfssS5haTj2iiak/DOb64JeN6OdLfLgptb6/e2kKR+ZuTrGoZTPA==}
++    peerDependencies:
++      '@types/react': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++
++  '@radix-ui/react-use-rect@1.1.2':
++    resolution: {integrity: sha512-d8a+bBY/FxikNPlgJJoaBHZX+zKVbWHYJGTLnLvveQgFSTntkGdEKv3JDtHrMS0DNYpllz2nRsTLGLKYttbpmw==}
++    peerDependencies:
++      '@types/react': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++
++  '@radix-ui/react-use-size@1.1.2':
++    resolution: {integrity: sha512-giWQp+4mxjBPt4KZ0MmyuykFNWfbDxKt4x+fPkRYmgRFJSbCZFzUglvMb/Kjn38tm10YP4ufiQZDx3zna4LU6w==}
++    peerDependencies:
++      '@types/react': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++
++  '@radix-ui/react-visually-hidden@1.2.6':
++    resolution: {integrity: sha512-jCE0WljWifTI4niIMCll06kGpsJTAPiZVU9H4WR1N6qW7At9ystHbN7dDB+we2xH535roFHj7qKS+RGj0FMDWQ==}
++    peerDependencies:
++      '@types/react': '*'
++      '@types/react-dom': '*'
++      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++      '@types/react-dom':
++        optional: true
++
++  '@radix-ui/rect@1.1.2':
++    resolution: {integrity: sha512-xnXE7wG13PI+cxieVssYXlQJuYVRhH9NBoxt3KNwzghDIA69GMm7d4wXRouHIYjE+KvS6U/MsMO73NdS2MH9ZA==}
++
+   '@rolldown/binding-android-arm64@1.0.3':
+     resolution: {integrity: sha512-454rs7jHngixp/NMxd5srYD57OnzSlZ/eFTETjORQHLwJG1lRtmNOJcBerZlfu4GjKqeq8aCCIQrMdHyhI51Hw==}
+     engines: {node: ^20.19.0 || >=22.12.0}
+     cpu: [arm64]
+     os: [android]
+ 
+   '@rolldown/binding-darwin-arm64@1.0.3':
+     resolution: {integrity: sha512-PcAhP+ynjURNyy8SKGl5DQP94aGuB/7JrXJb/t7P+hanXvQVMWzUvRRhBAcg/lNRadBhoUPqSoP4xw5tR/KBEA==}
+     engines: {node: ^20.19.0 || >=22.12.0}
+     cpu: [arm64]
+@@ -1072,20 +1417,24 @@ packages:
+     resolution: {integrity: sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg==}
+     engines: {node: '>=8'}
+ 
+   ansi-styles@5.2.0:
+     resolution: {integrity: sha512-Cxwpt2SfTzTtXcfOlzGEee8O+c+MmUgGrNiBcXnuWxuFJHe6a5Hz7qwhwe5OgaSYI0IJvkLqWX1ASG+cJOkEiA==}
+     engines: {node: '>=10'}
+ 
+   argparse@2.0.1:
+     resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
+ 
++  aria-hidden@1.2.6:
++    resolution: {integrity: sha512-ik3ZgC9dY/lYVVM++OISsaYDeg1tb0VtP5uL3ouh1koGOaUMDPpbFIei4JkFimWUFPn90sbMNMXQAIVOlnYKJA==}
++    engines: {node: '>=10'}
++
+   aria-query@5.3.0:
+     resolution: {integrity: sha512-b0P0sZPKtyu8HkeRAfCq0IfURZK+SuwMjY1UXGBU27wpAiTwQAIlq56IbIO+ytk/JjS1fMR14ee5WBBfKi5J6A==}
+ 
+   aria-query@5.3.2:
+     resolution: {integrity: sha512-COROpnaoap1E2F000S62r6A60uHZnmlvomhfyT2DlTcrY1OrBKn2UhH7qn5wTC9zMvD0AY7csdPSNwKP+7WiQw==}
+     engines: {node: '>= 0.4'}
+ 
+   array-buffer-byte-length@1.0.2:
+     resolution: {integrity: sha512-LHE+8BuR7RYGDKvnrmcuSq3tDcKv9OFEXQt/HpbZhY7V6h0zlUXutnAD82GiFx9rdieCMjkvtcsPqBwgUl1Iiw==}
+     engines: {node: '>= 0.4'}
+@@ -1286,20 +1635,23 @@ packages:
+     engines: {node: '>= 0.4'}
+ 
+   dequal@2.0.3:
+     resolution: {integrity: sha512-0je+qPKHEMohvfRTCEo3CrPG6cAzAYgmzKyxRiYSSDkS6eGJdyVJm7WaYA5ECaAD9wLB2T4EEeymA5aFVcYXCA==}
+     engines: {node: '>=6'}
+ 
+   detect-libc@2.1.2:
+     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
+     engines: {node: '>=8'}
+ 
++  detect-node-es@1.1.0:
++    resolution: {integrity: sha512-ypdmJU/TbBby2Dxibuv7ZLW3Bs1QEmM7nHjEANfohJLvE0XVujisn1qPJcZxg+qDucsr+bP6fLD1rPS3AhJ7EQ==}
++
+   doctrine@2.1.0:
+     resolution: {integrity: sha512-35mSku4ZXK0vfCuHEDAwt55dg2jNajHZ1odvF+8SSr82EsZY4QmXfuWso8oEd8zRhVObSN18aM0CjSdoBX7zIw==}
+     engines: {node: '>=0.10.0'}
+ 
+   dom-accessibility-api@0.5.16:
+     resolution: {integrity: sha512-X7BJ2yElsnOJ30pZF4uIIDfBEVgF4XEBxL9Bxhy6dnrm5hkzqmsWHGTiHqRiITNhMyFLyAiWndIJP7Z1NTteDg==}
+ 
+   dom-accessibility-api@0.6.3:
+     resolution: {integrity: sha512-7ZgogeTnjuHbo+ct10G9Ffp0mif17idi0IyWNVA/wcwcm7NPOD/WEHVP3n7n3MhXqxoIYm8d6MuZohYWIZ4T3w==}
+ 
+@@ -1577,20 +1929,24 @@ packages:
+     engines: {node: '>= 0.4'}
+ 
+   gensync@1.0.0-beta.2:
+     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
+     engines: {node: '>=6.9.0'}
+ 
+   get-intrinsic@1.3.0:
+     resolution: {integrity: sha512-9fSjSaos/fRIVIp+xSJlE6lfwhES7LNtKaCBIamHsjr2na1BiABJPo0mOjjz8GJDURarmCPGqaiVg5mfjb98CQ==}
+     engines: {node: '>= 0.4'}
+ 
++  get-nonce@1.0.1:
++    resolution: {integrity: sha512-FJhYRoDaiatfEkUK8HKlicmu/3SGFD51q3itKDGoSTysQJBnfOcxU5GxnhE1E6soB76MbT0MBtnKJuXyAx+96Q==}
++    engines: {node: '>=6'}
++
+   get-proto@1.0.1:
+     resolution: {integrity: sha512-sTSfBjoXBp89JvIKIefqw7U2CCebsc74kiY6awiGogKtoSGbgjYE/G/+l9sF3MWFPNc9IcoOC4ODfKHfxFmp0g==}
+     engines: {node: '>= 0.4'}
+ 
+   get-symbol-description@1.1.0:
+     resolution: {integrity: sha512-w9UMqWwJxHNOvoNzSJ2oPF5wvYcvP7jUvYzhp67yEhTi17ZDBBC1z9pTdGuzjD+EFIqLSYRweZjqfiPzQ06Ebg==}
+     engines: {node: '>= 0.4'}
+ 
+   get-tsconfig@4.14.0:
+     resolution: {integrity: sha512-yTb+8DXzDREzgvYmh6s9vHsSVCHeC0G3PI5bEXNBHtmshPnO+S5O7qgLEOn0I5QvMy6kpZN8K1NKGyilLb93wA==}
+@@ -2186,20 +2542,50 @@ packages:
+     engines: {node: '>=18.0.0'}
+     peerDependencies:
+       react: ^16.8.0 || ^17 || ^18 || ^19
+ 
+   react-is@16.13.1:
+     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
+ 
+   react-is@17.0.2:
+     resolution: {integrity: sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==}
+ 
++  react-remove-scroll-bar@2.3.8:
++    resolution: {integrity: sha512-9r+yi9+mgU33AKcj6IbT9oRCO78WriSj6t/cF8DWBZJ9aOGPOTEDvdUDz1FwKim7QXWwmHqtdHnRJfhAxEG46Q==}
++    engines: {node: '>=10'}
++    peerDependencies:
++      '@types/react': '*'
++      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++
++  react-remove-scroll@2.7.2:
++    resolution: {integrity: sha512-Iqb9NjCCTt6Hf+vOdNIZGdTiH1QSqr27H/Ek9sv/a97gfueI/5h1s3yRi1nngzMUaOOToin5dI1dXKdXiF+u0Q==}
++    engines: {node: '>=10'}
++    peerDependencies:
++      '@types/react': '*'
++      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++
++  react-style-singleton@2.2.3:
++    resolution: {integrity: sha512-b6jSvxvVnyptAiLjbkWLE/lOnR4lfTtDAl+eUC7RZy+QQWc6wRzIV2CE6xBuMmDxc2qIihtDCZD5NPOFl7fRBQ==}
++    engines: {node: '>=10'}
++    peerDependencies:
++      '@types/react': '*'
++      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++
+   react@19.2.4:
+     resolution: {integrity: sha512-9nfp2hYpCwOjAN+8TZFGhtWEwgvWHXqESH8qT89AT/lWklpLON22Lc8pEtnpsZz7VmawabSU0gCjnj8aC0euHQ==}
+     engines: {node: '>=0.10.0'}
+ 
+   redent@3.0.0:
+     resolution: {integrity: sha512-6tDA8g98We0zd0GvVeMT9arEOnTw9qM03L9cJXaCjrip1OO764RDBLBfrB4cwzNGDj5OA5ioymC9GkizgWJDUg==}
+     engines: {node: '>=8'}
+ 
+   reflect.getprototypeof@1.0.10:
+     resolution: {integrity: sha512-00o4I+DVrefhv+nX0ulyi3biSHCPDe+yLv5o/p6d/UVlirijB8E16FtfwSAi4g3tcqrQ4lRAqQSoFEZJehYEcw==}
+@@ -2485,20 +2871,40 @@ packages:
+ 
+   update-browserslist-db@1.2.3:
+     resolution: {integrity: sha512-Js0m9cx+qOgDxo0eMiFGEueWztz+d4+M3rGlmKPT+T4IS/jP4ylw3Nwpu6cpTTP8R1MAC1kF4VbdLt3ARf209w==}
+     hasBin: true
+     peerDependencies:
+       browserslist: '>= 4.21.0'
+ 
+   uri-js@4.4.1:
+     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
+ 
++  use-callback-ref@1.3.3:
++    resolution: {integrity: sha512-jQL3lRnocaFtu3V00JToYz/4QkNWswxijDaCVNZRiRTO3HQDLsdu1ZtmIUvV4yPp+rvWm5j0y0TG/S61cuijTg==}
++    engines: {node: '>=10'}
++    peerDependencies:
++      '@types/react': '*'
++      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++
++  use-sidecar@1.1.3:
++    resolution: {integrity: sha512-Fedw0aZvkhynoPYlA5WXrMCAMm+nSWdZt6lzJQ7Ok8S6Q+VsHmHpRWndVRJ8Be0ZbkfPc5LRYH+5XrzXcEeLRQ==}
++    engines: {node: '>=10'}
++    peerDependencies:
++      '@types/react': '*'
++      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
++    peerDependenciesMeta:
++      '@types/react':
++        optional: true
++
+   vite@8.0.16:
+     resolution: {integrity: sha512-h9bXPmJichP5fLmVQo3PyaGSDE2n3aPuomeAlVRm0JLmt4rY6zmPKd59HYI4LNW8oTK7tlTsuC7l/m7awx9Jcw==}
+     engines: {node: ^20.19.0 || >=22.12.0}
+     hasBin: true
+     peerDependencies:
+       '@types/node': ^20.19.0 || >=22.12.0
+       '@vitejs/devtools': ^0.1.18
+       esbuild: ^0.27.0 || ^0.28.0
+       jiti: '>=1.21.0'
+       less: ^4.0.0
+@@ -2881,20 +3287,37 @@ snapshots:
+ 
+   '@eslint/object-schema@2.1.7': {}
+ 
+   '@eslint/plugin-kit@0.4.1':
+     dependencies:
+       '@eslint/core': 0.17.0
+       levn: 0.4.1
+ 
+   '@exodus/bytes@1.15.1': {}
+ 
++  '@floating-ui/core@1.7.5':
++    dependencies:
++      '@floating-ui/utils': 0.2.11
++
++  '@floating-ui/dom@1.7.6':
++    dependencies:
++      '@floating-ui/core': 1.7.5
++      '@floating-ui/utils': 0.2.11
++
++  '@floating-ui/react-dom@2.1.8(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
++    dependencies:
++      '@floating-ui/dom': 1.7.6
++      react: 19.2.4
++      react-dom: 19.2.4(react@19.2.4)
++
++  '@floating-ui/utils@0.2.11': {}
++
+   '@hookform/resolvers@5.4.0(react-hook-form@7.80.0(react@19.2.4))':
+     dependencies:
+       '@standard-schema/utils': 0.3.0
+       react-hook-form: 7.80.0(react@19.2.4)
+ 
+   '@humanfs/core@0.19.2':
+     dependencies:
+       '@humanfs/types': 0.15.0
+ 
+   '@humanfs/node@0.16.8':
+@@ -3071,20 +3494,333 @@ snapshots:
+ 
+   '@nodelib/fs.walk@1.2.8':
+     dependencies:
+       '@nodelib/fs.scandir': 2.1.5
+       fastq: 1.20.1
+ 
+   '@nolyfill/is-core-module@1.0.39': {}
+ 
+   '@oxc-project/types@0.133.0': {}
+ 
++  '@radix-ui/primitive@1.1.4': {}
++
++  '@radix-ui/react-arrow@1.1.10(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
++    dependencies:
++      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      react: 19.2.4
++      react-dom: 19.2.4(react@19.2.4)
++    optionalDependencies:
++      '@types/react': 19.2.17
++      '@types/react-dom': 19.2.3(@types/react@19.2.17)
++
++  '@radix-ui/react-collection@1.1.10(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
++    dependencies:
++      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-context': 1.1.4(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-slot': 1.3.0(@types/react@19.2.17)(react@19.2.4)
++      react: 19.2.4
++      react-dom: 19.2.4(react@19.2.4)
++    optionalDependencies:
++      '@types/react': 19.2.17
++      '@types/react-dom': 19.2.3(@types/react@19.2.17)
++
++  '@radix-ui/react-compose-refs@1.1.3(@types/react@19.2.17)(react@19.2.4)':
++    dependencies:
++      react: 19.2.4
++    optionalDependencies:
++      '@types/react': 19.2.17
++
++  '@radix-ui/react-context@1.1.4(@types/react@19.2.17)(react@19.2.4)':
++    dependencies:
++      react: 19.2.4
++    optionalDependencies:
++      '@types/react': 19.2.17
++
++  '@radix-ui/react-dialog@1.1.17(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
++    dependencies:
++      '@radix-ui/primitive': 1.1.4
++      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-context': 1.1.4(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-dismissable-layer': 1.1.13(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-focus-guards': 1.1.4(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-focus-scope': 1.1.10(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-id': 1.1.2(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-portal': 1.1.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-presence': 1.1.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-slot': 1.3.0(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.2.17)(react@19.2.4)
++      aria-hidden: 1.2.6
++      react: 19.2.4
++      react-dom: 19.2.4(react@19.2.4)
++      react-remove-scroll: 2.7.2(@types/react@19.2.17)(react@19.2.4)
++    optionalDependencies:
++      '@types/react': 19.2.17
++      '@types/react-dom': 19.2.3(@types/react@19.2.17)
++
++  '@radix-ui/react-direction@1.1.2(@types/react@19.2.17)(react@19.2.4)':
++    dependencies:
++      react: 19.2.4
++    optionalDependencies:
++      '@types/react': 19.2.17
++
++  '@radix-ui/react-dismissable-layer@1.1.13(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
++    dependencies:
++      '@radix-ui/primitive': 1.1.4
++      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-use-callback-ref': 1.1.2(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-use-escape-keydown': 1.1.2(@types/react@19.2.17)(react@19.2.4)
++      react: 19.2.4
++      react-dom: 19.2.4(react@19.2.4)
++    optionalDependencies:
++      '@types/react': 19.2.17
++      '@types/react-dom': 19.2.3(@types/react@19.2.17)
++
++  '@radix-ui/react-dropdown-menu@2.1.18(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
++    dependencies:
++      '@radix-ui/primitive': 1.1.4
++      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-context': 1.1.4(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-id': 1.1.2(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-menu': 2.1.18(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.2.17)(react@19.2.4)
++      react: 19.2.4
++      react-dom: 19.2.4(react@19.2.4)
++    optionalDependencies:
++      '@types/react': 19.2.17
++      '@types/react-dom': 19.2.3(@types/react@19.2.17)
++
++  '@radix-ui/react-focus-guards@1.1.4(@types/react@19.2.17)(react@19.2.4)':
++    dependencies:
++      react: 19.2.4
++    optionalDependencies:
++      '@types/react': 19.2.17
++
++  '@radix-ui/react-focus-scope@1.1.10(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
++    dependencies:
++      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-use-callback-ref': 1.1.2(@types/react@19.2.17)(react@19.2.4)
++      react: 19.2.4
++      react-dom: 19.2.4(react@19.2.4)
++    optionalDependencies:
++      '@types/react': 19.2.17
++      '@types/react-dom': 19.2.3(@types/react@19.2.17)
++
++  '@radix-ui/react-id@1.1.2(@types/react@19.2.17)(react@19.2.4)':
++    dependencies:
++      '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.2.17)(react@19.2.4)
++      react: 19.2.4
++    optionalDependencies:
++      '@types/react': 19.2.17
++
++  '@radix-ui/react-menu@2.1.18(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
++    dependencies:
++      '@radix-ui/primitive': 1.1.4
++      '@radix-ui/react-collection': 1.1.10(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-context': 1.1.4(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-direction': 1.1.2(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-dismissable-layer': 1.1.13(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-focus-guards': 1.1.4(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-focus-scope': 1.1.10(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-id': 1.1.2(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-popper': 1.3.1(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-portal': 1.1.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-presence': 1.1.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-roving-focus': 1.1.13(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-slot': 1.3.0(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-use-callback-ref': 1.1.2(@types/react@19.2.17)(react@19.2.4)
++      aria-hidden: 1.2.6
++      react: 19.2.4
++      react-dom: 19.2.4(react@19.2.4)
++      react-remove-scroll: 2.7.2(@types/react@19.2.17)(react@19.2.4)
++    optionalDependencies:
++      '@types/react': 19.2.17
++      '@types/react-dom': 19.2.3(@types/react@19.2.17)
++
++  '@radix-ui/react-popover@1.1.17(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
++    dependencies:
++      '@radix-ui/primitive': 1.1.4
++      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-context': 1.1.4(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-dismissable-layer': 1.1.13(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-focus-guards': 1.1.4(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-focus-scope': 1.1.10(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-id': 1.1.2(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-popper': 1.3.1(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-portal': 1.1.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-presence': 1.1.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-slot': 1.3.0(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.2.17)(react@19.2.4)
++      aria-hidden: 1.2.6
++      react: 19.2.4
++      react-dom: 19.2.4(react@19.2.4)
++      react-remove-scroll: 2.7.2(@types/react@19.2.17)(react@19.2.4)
++    optionalDependencies:
++      '@types/react': 19.2.17
++      '@types/react-dom': 19.2.3(@types/react@19.2.17)
++
++  '@radix-ui/react-popper@1.3.1(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
++    dependencies:
++      '@floating-ui/react-dom': 2.1.8(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-arrow': 1.1.10(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-context': 1.1.4(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-use-callback-ref': 1.1.2(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-use-rect': 1.1.2(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-use-size': 1.1.2(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/rect': 1.1.2
++      react: 19.2.4
++      react-dom: 19.2.4(react@19.2.4)
++    optionalDependencies:
++      '@types/react': 19.2.17
++      '@types/react-dom': 19.2.3(@types/react@19.2.17)
++
++  '@radix-ui/react-portal@1.1.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
++    dependencies:
++      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.2.17)(react@19.2.4)
++      react: 19.2.4
++      react-dom: 19.2.4(react@19.2.4)
++    optionalDependencies:
++      '@types/react': 19.2.17
++      '@types/react-dom': 19.2.3(@types/react@19.2.17)
++
++  '@radix-ui/react-presence@1.1.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
++    dependencies:
++      '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.2.17)(react@19.2.4)
++      react: 19.2.4
++      react-dom: 19.2.4(react@19.2.4)
++    optionalDependencies:
++      '@types/react': 19.2.17
++      '@types/react-dom': 19.2.3(@types/react@19.2.17)
++
++  '@radix-ui/react-primitive@2.1.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
++    dependencies:
++      '@radix-ui/react-slot': 1.3.0(@types/react@19.2.17)(react@19.2.4)
++      react: 19.2.4
++      react-dom: 19.2.4(react@19.2.4)
++    optionalDependencies:
++      '@types/react': 19.2.17
++      '@types/react-dom': 19.2.3(@types/react@19.2.17)
++
++  '@radix-ui/react-roving-focus@1.1.13(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
++    dependencies:
++      '@radix-ui/primitive': 1.1.4
++      '@radix-ui/react-collection': 1.1.10(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-context': 1.1.4(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-direction': 1.1.2(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-id': 1.1.2(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-use-callback-ref': 1.1.2(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.2.17)(react@19.2.4)
++      react: 19.2.4
++      react-dom: 19.2.4(react@19.2.4)
++    optionalDependencies:
++      '@types/react': 19.2.17
++      '@types/react-dom': 19.2.3(@types/react@19.2.17)
++
++  '@radix-ui/react-slot@1.3.0(@types/react@19.2.17)(react@19.2.4)':
++    dependencies:
++      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.2.17)(react@19.2.4)
++      react: 19.2.4
++    optionalDependencies:
++      '@types/react': 19.2.17
++
++  '@radix-ui/react-tooltip@1.2.10(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
++    dependencies:
++      '@radix-ui/primitive': 1.1.4
++      '@radix-ui/react-compose-refs': 1.1.3(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-context': 1.1.4(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-dismissable-layer': 1.1.13(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-id': 1.1.2(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-popper': 1.3.1(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-portal': 1.1.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-presence': 1.1.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      '@radix-ui/react-slot': 1.3.0(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-use-controllable-state': 1.2.3(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-visually-hidden': 1.2.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      react: 19.2.4
++      react-dom: 19.2.4(react@19.2.4)
++    optionalDependencies:
++      '@types/react': 19.2.17
++      '@types/react-dom': 19.2.3(@types/react@19.2.17)
++
++  '@radix-ui/react-use-callback-ref@1.1.2(@types/react@19.2.17)(react@19.2.4)':
++    dependencies:
++      react: 19.2.4
++    optionalDependencies:
++      '@types/react': 19.2.17
++
++  '@radix-ui/react-use-controllable-state@1.2.3(@types/react@19.2.17)(react@19.2.4)':
++    dependencies:
++      '@radix-ui/react-use-effect-event': 0.0.3(@types/react@19.2.17)(react@19.2.4)
++      '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.2.17)(react@19.2.4)
++      react: 19.2.4
++    optionalDependencies:
++      '@types/react': 19.2.17
++
++  '@radix-ui/react-use-effect-event@0.0.3(@types/react@19.2.17)(react@19.2.4)':
++    dependencies:
++      '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.2.17)(react@19.2.4)
++      react: 19.2.4
++    optionalDependencies:
++      '@types/react': 19.2.17
++
++  '@radix-ui/react-use-escape-keydown@1.1.2(@types/react@19.2.17)(react@19.2.4)':
++    dependencies:
++      '@radix-ui/react-use-callback-ref': 1.1.2(@types/react@19.2.17)(react@19.2.4)
++      react: 19.2.4
++    optionalDependencies:
++      '@types/react': 19.2.17
++
++  '@radix-ui/react-use-layout-effect@1.1.2(@types/react@19.2.17)(react@19.2.4)':
++    dependencies:
++      react: 19.2.4
++    optionalDependencies:
++      '@types/react': 19.2.17
++
++  '@radix-ui/react-use-rect@1.1.2(@types/react@19.2.17)(react@19.2.4)':
++    dependencies:
++      '@radix-ui/rect': 1.1.2
++      react: 19.2.4
++    optionalDependencies:
++      '@types/react': 19.2.17
++
++  '@radix-ui/react-use-size@1.1.2(@types/react@19.2.17)(react@19.2.4)':
++    dependencies:
++      '@radix-ui/react-use-layout-effect': 1.1.2(@types/react@19.2.17)(react@19.2.4)
++      react: 19.2.4
++    optionalDependencies:
++      '@types/react': 19.2.17
++
++  '@radix-ui/react-visually-hidden@1.2.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
++    dependencies:
++      '@radix-ui/react-primitive': 2.1.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
++      react: 19.2.4
++      react-dom: 19.2.4(react@19.2.4)
++    optionalDependencies:
++      '@types/react': 19.2.17
++      '@types/react-dom': 19.2.3(@types/react@19.2.17)
++
++  '@radix-ui/rect@1.1.2': {}
++
+   '@rolldown/binding-android-arm64@1.0.3':
+     optional: true
+ 
+   '@rolldown/binding-darwin-arm64@1.0.3':
+     optional: true
+ 
+   '@rolldown/binding-darwin-x64@1.0.3':
+     optional: true
+ 
+   '@rolldown/binding-freebsd-x64@1.0.3':
+@@ -3506,20 +4242,24 @@ snapshots:
+   ansi-regex@5.0.1: {}
+ 
+   ansi-styles@4.3.0:
+     dependencies:
+       color-convert: 2.0.1
+ 
+   ansi-styles@5.2.0: {}
+ 
+   argparse@2.0.1: {}
+ 
++  aria-hidden@1.2.6:
++    dependencies:
++      tslib: 2.8.1
++
+   aria-query@5.3.0:
+     dependencies:
+       dequal: 2.0.3
+ 
+   aria-query@5.3.2: {}
+ 
+   array-buffer-byte-length@1.0.2:
+     dependencies:
+       call-bound: 1.0.4
+       is-array-buffer: 3.0.5
+@@ -3740,20 +4480,22 @@ snapshots:
+   define-properties@1.2.1:
+     dependencies:
+       define-data-property: 1.1.4
+       has-property-descriptors: 1.0.2
+       object-keys: 1.1.1
+ 
+   dequal@2.0.3: {}
+ 
+   detect-libc@2.1.2: {}
+ 
++  detect-node-es@1.1.0: {}
++
+   doctrine@2.1.0:
+     dependencies:
+       esutils: 2.0.3
+ 
+   dom-accessibility-api@0.5.16: {}
+ 
+   dom-accessibility-api@0.6.3: {}
+ 
+   dunder-proto@1.0.1:
+     dependencies:
+@@ -4183,20 +4925,22 @@ snapshots:
+       es-define-property: 1.0.1
+       es-errors: 1.3.0
+       es-object-atoms: 1.1.2
+       function-bind: 1.1.2
+       get-proto: 1.0.1
+       gopd: 1.2.0
+       has-symbols: 1.1.0
+       hasown: 2.0.4
+       math-intrinsics: 1.1.0
+ 
++  get-nonce@1.0.1: {}
++
+   get-proto@1.0.1:
+     dependencies:
+       dunder-proto: 1.0.1
+       es-object-atoms: 1.1.2
+ 
+   get-symbol-description@1.1.0:
+     dependencies:
+       call-bound: 1.0.4
+       es-errors: 1.3.0
+       get-intrinsic: 1.3.0
+@@ -4761,20 +5505,47 @@ snapshots:
+       scheduler: 0.27.0
+ 
+   react-hook-form@7.80.0(react@19.2.4):
+     dependencies:
+       react: 19.2.4
+ 
+   react-is@16.13.1: {}
+ 
+   react-is@17.0.2: {}
+ 
++  react-remove-scroll-bar@2.3.8(@types/react@19.2.17)(react@19.2.4):
++    dependencies:
++      react: 19.2.4
++      react-style-singleton: 2.2.3(@types/react@19.2.17)(react@19.2.4)
++      tslib: 2.8.1
++    optionalDependencies:
++      '@types/react': 19.2.17
++
++  react-remove-scroll@2.7.2(@types/react@19.2.17)(react@19.2.4):
++    dependencies:
++      react: 19.2.4
++      react-remove-scroll-bar: 2.3.8(@types/react@19.2.17)(react@19.2.4)
++      react-style-singleton: 2.2.3(@types/react@19.2.17)(react@19.2.4)
++      tslib: 2.8.1
++      use-callback-ref: 1.3.3(@types/react@19.2.17)(react@19.2.4)
++      use-sidecar: 1.1.3(@types/react@19.2.17)(react@19.2.4)
++    optionalDependencies:
++      '@types/react': 19.2.17
++
++  react-style-singleton@2.2.3(@types/react@19.2.17)(react@19.2.4):
++    dependencies:
++      get-nonce: 1.0.1
++      react: 19.2.4
++      tslib: 2.8.1
++    optionalDependencies:
++      '@types/react': 19.2.17
++
+   react@19.2.4: {}
+ 
+   redent@3.0.0:
+     dependencies:
+       indent-string: 4.0.0
+       strip-indent: 3.0.0
+ 
+   reflect.getprototypeof@1.0.10:
+     dependencies:
+       call-bind: 1.0.9
+@@ -5180,20 +5951,35 @@ snapshots:
+   update-browserslist-db@1.2.3(browserslist@4.28.4):
+     dependencies:
+       browserslist: 4.28.4
+       escalade: 3.2.0
+       picocolors: 1.1.1
+ 
+   uri-js@4.4.1:
+     dependencies:
+       punycode: 2.3.1
+ 
++  use-callback-ref@1.3.3(@types/react@19.2.17)(react@19.2.4):
++    dependencies:
++      react: 19.2.4
++      tslib: 2.8.1
++    optionalDependencies:
++      '@types/react': 19.2.17
++
++  use-sidecar@1.1.3(@types/react@19.2.17)(react@19.2.4):
++    dependencies:
++      detect-node-es: 1.1.0
++      react: 19.2.4
++      tslib: 2.8.1
++    optionalDependencies:
++      '@types/react': 19.2.17
++
+   vite@8.0.16(@types/node@20.19.43)(jiti@2.7.0):
+     dependencies:
+       lightningcss: 1.32.0
+       picomatch: 4.0.4
+       postcss: 8.5.15
+       rolldown: 1.0.3
+       tinyglobby: 0.2.17
+     optionalDependencies:
+       '@types/node': 20.19.43
+       fsevents: 2.3.3
+diff --git a/src/app/layout.tsx b/src/app/layout.tsx
+index 11d7688..4ff132c 100644
+--- a/src/app/layout.tsx
++++ b/src/app/layout.tsx
+@@ -1,15 +1,16 @@
+ import type { Metadata } from "next";
+ import { Geist, Geist_Mono } from "next/font/google";
+ import "./globals.css";
+ import { QueryProvider } from "@/providers/query-provider";
+ import { MotionProvider } from "@/providers/motion-provider";
++import { LayoutWrapper } from "@/components/layouts/layout-wrapper";
+ 
+ const geistSans = Geist({
+   variable: "--font-geist-sans",
+   subsets: ["latin"],
+ });
+ 
+ const geistMono = Geist_Mono({
+   variable: "--font-geist-mono",
+   subsets: ["latin"],
+ });
+@@ -25,18 +26,20 @@ export default function RootLayout({
+   children: React.ReactNode;
+ }>) {
+   return (
+     <html
+       lang="en"
+       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+     >
+       <body className="min-h-full flex flex-col">
+         <QueryProvider>
+           <MotionProvider>
+-            {children}
++            <LayoutWrapper>
++              {children}
++            </LayoutWrapper>
+           </MotionProvider>
+         </QueryProvider>
+       </body>
+     </html>
+   );
+ }
+ 
+diff --git a/src/components/layouts/layout-wrapper.tsx b/src/components/layouts/layout-wrapper.tsx
+new file mode 100644
+index 0000000..3b78156
+--- /dev/null
++++ b/src/components/layouts/layout-wrapper.tsx
+@@ -0,0 +1,48 @@
++"use client";
++
++import React from "react";
++import { usePathname } from "next/navigation";
++import { PlayerHeader } from "./player-header";
++import { PlayerMobileNav } from "./player-mobile-nav";
++import { OwnerSidebar } from "./owner-sidebar";
++
++interface LayoutWrapperProps {
++  children: React.ReactNode;
++}
++
++export function LayoutWrapper({ children }: LayoutWrapperProps) {
++  const pathname = usePathname() || "";
++  
++  // Check if current route is owner or admin panel
++  const isProLayout = pathname.startsWith("/owner") || pathname.startsWith("/admin");
++
++  if (isProLayout) {
++    return (
++      <div className="flex h-screen w-screen overflow-hidden bg-[var(--pc-canvas)]">
++        {/* Pro Layout: Sidebar on Desktop */}
++        <OwnerSidebar />
++        
++        {/* Main Content Area */}
++        <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
++          {children}
++        </main>
++      </div>
++    );
++  }
++
++  // Player/Public Layout
++  return (
++    <div className="flex flex-col min-h-screen bg-[var(--pc-canvas)] text-[var(--pc-body)]">
++      {/* Top Header */}
++      <PlayerHeader />
++      
++      {/* Main Content Area - adding padding bottom on mobile for navigation bar height */}
++      <main className="flex-1 pb-16 md:pb-0">
++        {children}
++      </main>
++      
++      {/* Bottom Navigation for Mobile */}
++      <PlayerMobileNav />
++    </div>
++  );
++}
+diff --git a/src/components/layouts/owner-sidebar.tsx b/src/components/layouts/owner-sidebar.tsx
+new file mode 100644
+index 0000000..df8d915
+--- /dev/null
++++ b/src/components/layouts/owner-sidebar.tsx
+@@ -0,0 +1,157 @@
++"use client";
++
++import React, { useState } from "react";
++import Link from "next/link";
++import { usePathname } from "next/navigation";
++import { 
++  LayoutDashboard, 
++  Calendar, 
++  Trophy, 
++  CreditCard, 
++  BarChart, 
++  Settings, 
++  ChevronLeft, 
++  ChevronRight, 
++  MapPin,
++  Home
++} from "lucide-react";
++import * as Tooltip from "@radix-ui/react-tooltip";
++
++export function OwnerSidebar() {
++  const pathname = usePathname();
++  const [isCollapsed, setIsCollapsed] = useState(false);
++  const [selectedVenue, setSelectedVenue] = useState("venue-1");
++
++  const venues = [
++    { id: "venue-1", name: "Sân Tennis Bình Vị" },
++    { id: "venue-2", name: "Sân Tennis Kỳ Hòa" },
++    { id: "venue-3", name: "Pickleball Hoàng Hoa Thám" },
++  ];
++
++  const menuItems = [
++    { name: "Tổng quan", href: "/owner", icon: LayoutDashboard },
++    { name: "Lịch đặt", href: "/owner/calendar", icon: Calendar },
++    { name: "Danh sách sân", href: "/owner/courts", icon: Trophy },
++    { name: "Đơn đặt sân", href: "/owner/bookings", icon: CreditCard },
++    { name: "Doanh thu", href: "/owner/revenue", icon: BarChart },
++    { name: "Cấu hình", href: "/owner/settings", icon: Settings },
++  ];
++
++  return (
++    <Tooltip.Provider>
++      <aside 
++        data-testid="owner-sidebar"
++        className={`relative hidden md:flex flex-col h-screen border-r border-[var(--pc-hairline)] bg-[var(--pc-surface)] transition-all duration-300 ${
++          isCollapsed ? "w-[72px]" : "w-[248px]"
++        }`}
++      >
++        {/* Upper Area: Venue Selector / Logo */}
++        <div className="flex flex-col gap-4 p-4 border-b border-[var(--pc-hairline)]">
++          
++          {/* Toggle Button */}
++          <Tooltip.Root>
++            <Tooltip.Trigger asChild>
++              <button
++                type="button"
++                onClick={() => setIsCollapsed(!isCollapsed)}
++                className="absolute -right-3 top-5 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-[var(--pc-hairline)] bg-[var(--pc-surface)] text-[var(--pc-mute)] hover:text-[var(--pc-ink)] shadow-xs transition-transform cursor-pointer"
++                aria-label={isCollapsed ? "Mở rộng" : "Thu nhỏ"}
++              >
++                {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
++              </button>
++            </Tooltip.Trigger>
++            <Tooltip.Portal>
++              <Tooltip.Content
++                side="right"
++                align="center"
++                sideOffset={8}
++                className="z-50 rounded-md bg-[var(--pc-ink)] px-2.5 py-1.5 text-xs font-mono text-[var(--pc-canvas)] shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)] animate-in fade-in zoom-in-95 duration-150"
++              >
++                {isCollapsed ? "Mở rộng menu" : "Thu nhỏ menu"}
++                <Tooltip.Arrow className="fill-[var(--pc-ink)]" />
++              </Tooltip.Content>
++            </Tooltip.Portal>
++          </Tooltip.Root>
++
++        {/* Venue Selector */}
++        <div className="flex flex-col gap-1">
++          {isCollapsed ? (
++            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-md bg-[var(--pc-green-50)] text-[var(--pc-green-800)]" title="Chọn địa điểm">
++              <Home className="h-5 w-5" />
++            </div>
++          ) : (
++            <div className="flex flex-col gap-1.5">
++              <label htmlFor="venue-select" className="flex items-center gap-1.5 text-xs font-semibold text-[var(--pc-mute)] uppercase tracking-wider font-mono">
++                <MapPin className="h-3.5 w-3.5 text-[var(--pc-green-700)]" />
++                <span>Địa điểm quản lý</span>
++              </label>
++              <div className="relative">
++                <select
++                  id="venue-select"
++                  value={selectedVenue}
++                  onChange={(e) => setSelectedVenue(e.target.value)}
++                  className="w-full appearance-none rounded-md border border-[var(--pc-hairline)] bg-[var(--pc-canvas)] py-2 pl-3 pr-8 text-sm font-medium text-[var(--pc-ink)] focus:outline-hidden focus:ring-1 focus:ring-[var(--pc-green-700)] transition-all cursor-pointer"
++                >
++                  {venues.map((venue) => (
++                    <option key={venue.id} value={venue.id}>
++                      {venue.name}
++                    </option>
++                  ))}
++                </select>
++                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-[var(--pc-mute)]">
++                  <ChevronRight className="h-4 w-4 rotate-90" />
++                </div>
++              </div>
++            </div>
++          )}
++        </div>
++
++      </div>
++
++      {/* Navigation Links */}
++      <nav className="flex-1 space-y-1 p-3 overflow-y-auto">
++        {menuItems.map((item) => {
++          const isActive = pathname === item.href;
++          const Icon = item.icon;
++          return (
++            <Link
++              key={item.href}
++              href={item.href}
++              className={`flex items-center gap-3 rounded-md py-2.5 px-3 text-sm font-medium transition-all group ${
++                isActive 
++                  ? "border-l-2 border-[var(--pc-green-700)] bg-[var(--pc-green-50)] text-[var(--pc-ink)]" 
++                  : "text-[var(--pc-mute)] hover:bg-[var(--pc-hairline-soft)] hover:text-[var(--pc-ink)]"
++              }`}
++            >
++              <Icon className={`h-5 w-5 shrink-0 transition-colors ${
++                isActive ? "text-[var(--pc-green-700)]" : "text-[var(--pc-mute)] group-hover:text-[var(--pc-ink)]"
++              }`} />
++              {!isCollapsed && <span className="truncate">{item.name}</span>}
++            </Link>
++          );
++        })}
++      </nav>
++
++      {/* Sidebar Footer */}
++      <div className="p-4 border-t border-[var(--pc-hairline)]">
++        {!isCollapsed ? (
++          <div className="flex items-center gap-3">
++            <div className="h-8 w-8 rounded-full bg-[var(--pc-green-800)] text-white flex items-center justify-center font-bold text-xs font-mono">
++              PC
++            </div>
++            <div className="truncate">
++              <p className="text-xs font-semibold text-[var(--pc-ink)] leading-none">PlayCourt Pro</p>
++              <span className="text-[10px] text-[var(--pc-mute)] font-mono">Owner Dashboard</span>
++            </div>
++          </div>
++        ) : (
++          <div className="mx-auto h-8 w-8 rounded-full bg-[var(--pc-green-800)] text-white flex items-center justify-center font-bold text-xs font-mono" title="PlayCourt Pro">
++            PC
++          </div>
++        )}
++      </div>
++
++      </aside>
++    </Tooltip.Provider>
++  );
++}
+diff --git a/src/components/layouts/player-header.tsx b/src/components/layouts/player-header.tsx
+new file mode 100644
+index 0000000..671a949
+--- /dev/null
++++ b/src/components/layouts/player-header.tsx
+@@ -0,0 +1,229 @@
++"use client";
++
++import React from "react";
++import Link from "next/link";
++import { usePathname } from "next/navigation";
++import { Search, Bell, User, Settings, LogOut, LayoutDashboard } from "lucide-react";
++import * as Popover from "@radix-ui/react-popover";
++import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
++import * as Tooltip from "@radix-ui/react-tooltip";
++
++export function PlayerHeader() {
++  const pathname = usePathname();
++
++  const navLinks = [
++    { name: "Tìm sân", href: "/courts" },
++    { name: "Tìm trận", href: "/matches" },
++    { name: "Booking", href: "/bookings" },
++  ];
++
++  const notifications = [
++    { id: 1, text: "Yêu cầu đặt sân #1204 của bạn đã được xác nhận.", time: "5 phút trước", unread: true },
++    { id: 2, text: "Có trận đấu mới phù hợp với trình độ của bạn tại sân Bình Vị.", time: "1 giờ trước", unread: false },
++    { id: 3, text: "Ưu đãi 20% đặt sân giờ vàng từ 14:00 - 17:00 ngày mai.", time: "5 giờ trước", unread: false },
++  ];
++
++  return (
++    <Tooltip.Provider>
++      <header data-testid="player-header" className="sticky top-0 z-50 h-16 w-full border-b border-[var(--pc-hairline)] bg-[var(--pc-canvas)]/92 backdrop-blur-md transition-colors duration-200">
++        <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
++          
++          {/* Logo */}
++          <div className="flex items-center gap-8">
++            <Link href="/" className="flex items-center gap-1.5 font-sans text-xl font-semibold tracking-tight text-[var(--pc-ink)]">
++              <span>PlayCourt</span>
++              <span className="h-2 w-2 rounded-full bg-[var(--pc-tennis)]" aria-hidden="true" />
++            </Link>
++
++            {/* Desktop Navigation Links */}
++            <nav className="hidden md:flex items-center gap-6">
++              {navLinks.map((link) => {
++                const isActive = pathname === link.href;
++                return (
++                  <Link
++                    key={link.href}
++                    href={link.href}
++                    className={`relative py-5 text-sm font-medium transition-colors hover:text-[var(--pc-ink)] ${
++                      isActive ? "text-[var(--pc-ink)]" : "text-[var(--pc-mute)]"
++                    }`}
++                  >
++                    {link.name}
++                    {isActive && (
++                      <span className="absolute bottom-0 left-0 h-0.5 w-full bg-[var(--pc-tennis)]" />
++                    )}
++                  </Link>
++                );
++              })}
++            </nav>
++          </div>
++
++          {/* Action Buttons */}
++          <div className="flex items-center gap-4">
++            
++            {/* Search Button */}
++            <Tooltip.Root>
++              <Tooltip.Trigger asChild>
++                <button 
++                  type="button" 
++                  className="rounded-full p-2 text-[var(--pc-mute)] hover:bg-[var(--pc-hairline-soft)] hover:text-[var(--pc-ink)] transition-colors cursor-pointer"
++                  aria-label="Tìm kiếm"
++                >
++                  <Search className="h-5 w-5" />
++                </button>
++              </Tooltip.Trigger>
++              <Tooltip.Portal>
++                <Tooltip.Content
++                  side="bottom"
++                  align="center"
++                  sideOffset={4}
++                  className="z-50 rounded-md bg-[var(--pc-ink)] px-2.5 py-1.5 text-xs font-mono text-[var(--pc-canvas)] shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)] animate-in fade-in zoom-in-95 duration-150"
++                >
++                  Tìm kiếm
++                  <Tooltip.Arrow className="fill-[var(--pc-ink)]" />
++                </Tooltip.Content>
++              </Tooltip.Portal>
++            </Tooltip.Root>
++
++            {/* Notifications Popover */}
++            <Popover.Root>
++              <Tooltip.Root>
++                <Tooltip.Trigger asChild>
++                  <Popover.Trigger asChild>
++                    <button
++                      type="button"
++                      className="relative rounded-full p-2 text-[var(--pc-mute)] hover:bg-[var(--pc-hairline-soft)] hover:text-[var(--pc-ink)] transition-colors cursor-pointer"
++                      aria-label="Thông báo"
++                    >
++                      <Bell className="h-5 w-5" />
++                      <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-[var(--pc-error)]" />
++                    </button>
++                  </Popover.Trigger>
++                </Tooltip.Trigger>
++                <Tooltip.Portal>
++                  <Tooltip.Content
++                    side="bottom"
++                    align="center"
++                    sideOffset={4}
++                    className="z-50 rounded-md bg-[var(--pc-ink)] px-2.5 py-1.5 text-xs font-mono text-[var(--pc-canvas)] shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)] animate-in fade-in zoom-in-95 duration-150"
++                  >
++                    Thông báo
++                    <Tooltip.Arrow className="fill-[var(--pc-ink)]" />
++                  </Tooltip.Content>
++                </Tooltip.Portal>
++              </Tooltip.Root>
++
++              <Popover.Portal>
++                <Popover.Content
++                  align="end"
++                  sideOffset={8}
++                  className="z-50 w-80 rounded-2xl border border-[var(--pc-hairline)] bg-[var(--pc-surface)] p-2 shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)] ring-1 ring-black/5 animate-in fade-in slide-in-from-top-2 duration-200 focus:outline-hidden"
++                >
++                  <div className="flex items-center justify-between border-b border-[var(--pc-hairline)] px-3 py-2">
++                    <span className="text-sm font-semibold text-[var(--pc-ink)]">Thông báo mới</span>
++                    <button type="button" className="text-xs text-[var(--pc-green-700)] hover:underline">Đánh dấu đã đọc</button>
++                  </div>
++                  <div className="max-h-64 overflow-y-auto py-1">
++                    {notifications.map((notif) => (
++                      <div 
++                        key={notif.id} 
++                        className={`flex flex-col gap-1 rounded-md px-3 py-2 text-xs transition-colors hover:bg-[var(--pc-hairline-soft)] ${
++                          notif.unread ? "bg-[var(--pc-green-50)]/50" : ""
++                        }`}
++                      >
++                        <p className="font-medium text-[var(--pc-ink)]">{notif.text}</p>
++                        <span className="text-[10px] text-[var(--pc-mute)] font-mono">{notif.time}</span>
++                      </div>
++                    ))}
++                  </div>
++                </Popover.Content>
++              </Popover.Portal>
++            </Popover.Root>
++
++            {/* Profile Menu Dropdown */}
++            <DropdownMenu.Root>
++              <Tooltip.Root>
++                <Tooltip.Trigger asChild>
++                  <DropdownMenu.Trigger asChild>
++                    <button
++                      type="button"
++                      className="flex items-center justify-center h-9 w-9 rounded-full border border-[var(--pc-hairline)] bg-[var(--pc-hairline-soft)] hover:ring-2 hover:ring-[var(--pc-green-200)] transition-all overflow-hidden cursor-pointer"
++                      aria-label="Menu tài khoản"
++                    >
++                      <div className="text-xs font-semibold text-[var(--pc-ink)] font-mono">PC</div>
++                    </button>
++                  </DropdownMenu.Trigger>
++                </Tooltip.Trigger>
++                <Tooltip.Portal>
++                  <Tooltip.Content
++                    side="bottom"
++                    align="center"
++                    sideOffset={4}
++                    className="z-50 rounded-md bg-[var(--pc-ink)] px-2.5 py-1.5 text-xs font-mono text-[var(--pc-canvas)] shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)] animate-in fade-in zoom-in-95 duration-150"
++                  >
++                    Menu tài khoản
++                    <Tooltip.Arrow className="fill-[var(--pc-ink)]" />
++                  </Tooltip.Content>
++                </Tooltip.Portal>
++              </Tooltip.Root>
++
++              <DropdownMenu.Portal>
++                <DropdownMenu.Content
++                  align="end"
++                  sideOffset={8}
++                  className="z-50 w-56 rounded-2xl border border-[var(--pc-hairline)] bg-[var(--pc-surface)] p-1 shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)] ring-1 ring-black/5 animate-in fade-in slide-in-from-top-2 duration-200 focus:outline-hidden"
++                >
++                  <div className="px-3 py-2.5 border-b border-[var(--pc-hairline)]">
++                    <p className="text-xs font-medium text-[var(--pc-mute)] font-mono">Tài khoản</p>
++                    <p className="text-sm font-semibold text-[var(--pc-ink)] truncate">Nguyễn Văn A</p>
++                  </div>
++                  <div className="py-1">
++                    <DropdownMenu.Item asChild>
++                      <Link 
++                        href="/owner"
++                        className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-[var(--pc-ink)] hover:bg-[var(--pc-hairline-soft)] transition-colors outline-hidden cursor-pointer"
++                      >
++                        <LayoutDashboard className="h-4 w-4 text-[var(--pc-mute)]" />
++                        <span>Quản lý sân (Owner)</span>
++                      </Link>
++                    </DropdownMenu.Item>
++                    <DropdownMenu.Item asChild>
++                      <Link 
++                        href="/profile"
++                        className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-[var(--pc-ink)] hover:bg-[var(--pc-hairline-soft)] transition-colors outline-hidden cursor-pointer"
++                      >
++                        <User className="h-4 w-4 text-[var(--pc-mute)]" />
++                        <span>Hồ sơ cá nhân</span>
++                      </Link>
++                    </DropdownMenu.Item>
++                    <DropdownMenu.Item asChild>
++                      <Link 
++                        href="/settings"
++                        className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-[var(--pc-ink)] hover:bg-[var(--pc-hairline-soft)] transition-colors outline-hidden cursor-pointer"
++                      >
++                        <Settings className="h-4 w-4 text-[var(--pc-mute)]" />
++                        <span>Cài đặt</span>
++                      </Link>
++                    </DropdownMenu.Item>
++                  </div>
++                  <div className="border-t border-[var(--pc-hairline)] pt-1 mt-1">
++                    <DropdownMenu.Item asChild>
++                      <button
++                        type="button"
++                        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-[var(--pc-error)] hover:bg-[var(--pc-error-deep)]/5 transition-colors outline-hidden cursor-pointer"
++                      >
++                        <LogOut className="h-4 w-4" />
++                        <span>Đăng xuất</span>
++                      </button>
++                    </DropdownMenu.Item>
++                  </div>
++                </DropdownMenu.Content>
++              </DropdownMenu.Portal>
++            </DropdownMenu.Root>
++
++          </div>
++
++        </div>
++      </header>
++    </Tooltip.Provider>
++  );
++}
+diff --git a/src/components/layouts/player-mobile-nav.tsx b/src/components/layouts/player-mobile-nav.tsx
+new file mode 100644
+index 0000000..5507d30
+--- /dev/null
++++ b/src/components/layouts/player-mobile-nav.tsx
+@@ -0,0 +1,164 @@
++"use client";
++
++import React, { useState } from "react";
++import Link from "next/link";
++import { usePathname } from "next/navigation";
++import { Home, MapPin, Trophy, User, CalendarPlus, Swords, X } from "lucide-react";
++import * as Dialog from "@radix-ui/react-dialog";
++import * as Tooltip from "@radix-ui/react-tooltip";
++
++export function PlayerMobileNav() {
++  const pathname = usePathname();
++  const [isOpen, setIsOpen] = useState(false);
++
++  const tabs = [
++    { name: "Home", href: "/", icon: Home },
++    { name: "Sân", href: "/courts", icon: MapPin },
++    { name: "Trận", href: "/matches", icon: Trophy },
++    { name: "Tôi", href: "/profile", icon: User },
++  ];
++
++  return (
++    <Tooltip.Provider>
++      <nav data-testid="player-mobile-nav" className="fixed bottom-0 left-0 right-0 z-40 h-16 w-full border-t border-[var(--pc-hairline)] bg-[var(--pc-surface)] px-2 md:hidden">
++        <div className="mx-auto flex h-full max-w-lg items-center justify-around">
++          {/* Tab 1 & Tab 2 */}
++          {tabs.slice(0, 2).map((tab) => {
++            const isActive = pathname === tab.href;
++            const Icon = tab.icon;
++            return (
++              <Link
++                key={tab.href}
++                href={tab.href}
++                className={`flex flex-col items-center justify-center w-12 h-full gap-0.5 text-[10px] font-medium transition-colors ${
++                  isActive ? "text-[var(--pc-green-800)]" : "text-[var(--pc-mute)]"
++                }`}
++              >
++                <Icon className="h-5 w-5" />
++                <span>{tab.name}</span>
++              </Link>
++            );
++          })}
++
++          {/* Central "+" Action Button */}
++          <div className="relative -mt-6">
++            <Tooltip.Root>
++              <Tooltip.Trigger asChild>
++                <button
++                  type="button"
++                  onClick={() => setIsOpen(true)}
++                  className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--pc-green-800)] text-white shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)] transition-transform hover:scale-105 active:scale-95 cursor-pointer"
++                  aria-label="Tạo mới nhanh"
++                >
++                  <span className="text-2xl font-light leading-none">+</span>
++                </button>
++              </Tooltip.Trigger>
++              <Tooltip.Portal>
++                <Tooltip.Content
++                  side="top"
++                  align="center"
++                  sideOffset={8}
++                  className="z-50 rounded-md bg-[var(--pc-ink)] px-2.5 py-1.5 text-xs font-mono text-[var(--pc-canvas)] shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)] animate-in fade-in zoom-in-95 duration-150"
++                >
++                  Tạo mới nhanh
++                  <Tooltip.Arrow className="fill-[var(--pc-ink)]" />
++                </Tooltip.Content>
++              </Tooltip.Portal>
++            </Tooltip.Root>
++          </div>
++
++          {/* Tab 3 & Tab 4 */}
++          {tabs.slice(2).map((tab) => {
++            const isActive = pathname === tab.href;
++            const Icon = tab.icon;
++            return (
++              <Link
++                key={tab.href}
++                href={tab.href}
++                className={`flex flex-col items-center justify-center w-12 h-full gap-0.5 text-[10px] font-medium transition-colors ${
++                  isActive ? "text-[var(--pc-green-800)]" : "text-[var(--pc-mute)]"
++                }`}
++              >
++                <Icon className="h-5 w-5" />
++                <span>{tab.name}</span>
++              </Link>
++            );
++          })}
++        </div>
++      </nav>
++
++      {/* Action Sheet Modal using Radix UI Dialog */}
++      <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
++        <Dialog.Portal>
++          {/* Backdrop */}
++          <Dialog.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs transition-opacity animate-in fade-in duration-200 md:hidden" />
++
++          {/* Sheet Panel */}
++          <Dialog.Content className="fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl bg-[var(--pc-surface)] p-6 pb-8 shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)] border-t border-[var(--pc-hairline)] animate-in slide-in-from-bottom duration-300 focus:outline-hidden md:hidden">
++            <div className="flex items-center justify-between border-b border-[var(--pc-hairline)] pb-4">
++              <Dialog.Title className="text-base font-semibold text-[var(--pc-ink)]">
++                Tạo mới nhanh
++              </Dialog.Title>
++              <Dialog.Close asChild>
++                <Tooltip.Root>
++                  <Tooltip.Trigger asChild>
++                    <button
++                      type="button"
++                      className="rounded-full p-1 text-[var(--pc-mute)] hover:bg-[var(--pc-hairline-soft)] hover:text-[var(--pc-ink)] cursor-pointer"
++                      aria-label="Đóng"
++                    >
++                      <X className="h-5 w-5" />
++                    </button>
++                  </Tooltip.Trigger>
++                  <Tooltip.Portal>
++                    <Tooltip.Content
++                      side="top"
++                      align="center"
++                      sideOffset={8}
++                      className="z-50 rounded-md bg-[var(--pc-ink)] px-2.5 py-1.5 text-xs font-mono text-[var(--pc-canvas)] shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)] animate-in fade-in zoom-in-95 duration-150"
++                    >
++                      Đóng
++                      <Tooltip.Arrow className="fill-[var(--pc-ink)]" />
++                    </Tooltip.Content>
++                  </Tooltip.Portal>
++                </Tooltip.Root>
++              </Dialog.Close>
++            </div>
++
++            <div className="mt-6 grid grid-cols-2 gap-4">
++              {/* Option 1: Đặt sân nhanh */}
++              <button
++                type="button"
++                onClick={() => setIsOpen(false)}
++                className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-[var(--pc-hairline)] bg-[var(--pc-canvas)] p-5 text-center transition-all hover:border-[var(--pc-green-200)] hover:bg-[var(--pc-green-50)]/30 group cursor-pointer"
++              >
++                <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[var(--pc-green-100)] text-[var(--pc-green-800)] transition-transform group-hover:scale-110">
++                  <CalendarPlus className="h-6 w-6" />
++                </div>
++                <div>
++                  <span className="block text-sm font-semibold text-[var(--pc-ink)]">Đặt sân nhanh</span>
++                  <span className="block mt-0.5 text-[11px] text-[var(--pc-mute)] font-mono">Giữ sân trong 60s</span>
++                </div>
++              </button>
++
++              {/* Option 2: Tạo trận đấu */}
++              <button
++                type="button"
++                onClick={() => setIsOpen(false)}
++                className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-[var(--pc-hairline)] bg-[var(--pc-canvas)] p-5 text-center transition-all hover:border-[var(--pc-green-200)] hover:bg-[var(--pc-green-50)]/30 group cursor-pointer"
++              >
++                <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[var(--pc-tennis-soft)] text-[var(--pc-ink)] transition-transform group-hover:scale-110">
++                  <Swords className="h-6 w-6" />
++                </div>
++                <div>
++                  <span className="block text-sm font-semibold text-[var(--pc-ink)]">Tạo trận đấu</span>
++                  <span className="block mt-0.5 text-[11px] text-[var(--pc-mute)] font-mono">Tìm đối ghép kèo nhanh</span>
++                </div>
++              </button>
++            </div>
++          </Dialog.Content>
++        </Dialog.Portal>
++      </Dialog.Root>
++    </Tooltip.Provider>
++  );
++}
+diff --git a/tests/layouts.test.tsx b/tests/layouts.test.tsx
+new file mode 100644
+index 0000000..bb084ac
+--- /dev/null
++++ b/tests/layouts.test.tsx
+@@ -0,0 +1,104 @@
++import React from "react";
++import { render, screen } from "@testing-library/react";
++import { vi } from "vitest";
++import { PlayerHeader } from "@/components/layouts/player-header";
++import { PlayerMobileNav } from "@/components/layouts/player-mobile-nav";
++import { OwnerSidebar } from "@/components/layouts/owner-sidebar";
++import { LayoutWrapper } from "@/components/layouts/layout-wrapper";
++
++// Mock next/navigation with dynamic pathname support
++let mockPathname = "/";
++vi.mock("next/navigation", () => ({
++  usePathname: () => mockPathname,
++  useRouter: () => ({
++    push: vi.fn(),
++  }),
++}));
++
++describe("Layout Shell Components", () => {
++  describe("PlayerHeader", () => {
++    it("renders a <header> element", () => {
++      const { container } = render(<PlayerHeader />);
++      const headerElement = container.querySelector("header");
++      expect(headerElement).toBeInTheDocument();
++    });
++
++    it("displays the PlayCourt logo", () => {
++      render(<PlayerHeader />);
++      expect(screen.getByText("PlayCourt")).toBeInTheDocument();
++    });
++
++    it("displays the navigation links", () => {
++      render(<PlayerHeader />);
++      expect(screen.getByText("Tìm sân")).toBeInTheDocument();
++      expect(screen.getByText("Tìm trận")).toBeInTheDocument();
++      expect(screen.getByText("Booking")).toBeInTheDocument();
++    });
++  });
++
++  describe("PlayerMobileNav", () => {
++    it("renders a <nav> element", () => {
++      const { container } = render(<PlayerMobileNav />);
++      const navElement = container.querySelector("nav");
++      expect(navElement).toBeInTheDocument();
++    });
++
++    it("displays the mobile tab labels", () => {
++      render(<PlayerMobileNav />);
++      expect(screen.getByText("Home")).toBeInTheDocument();
++      expect(screen.getByText("Sân")).toBeInTheDocument();
++      expect(screen.getByText("Trận")).toBeInTheDocument();
++      expect(screen.getByText("Tôi")).toBeInTheDocument();
++    });
++
++    it("renders the central add action button", () => {
++      render(<PlayerMobileNav />);
++      const addButton = screen.getByRole("button", { name: "Tạo mới nhanh" });
++      expect(addButton).toBeInTheDocument();
++    });
++  });
++
++  describe("OwnerSidebar", () => {
++    it("renders an <aside> element", () => {
++      const { container } = render(<OwnerSidebar />);
++      const asideElement = container.querySelector("aside");
++      expect(asideElement).toBeInTheDocument();
++    });
++
++    it("contains a venue selector select dropdown", () => {
++      render(<OwnerSidebar />);
++      const selectElement = screen.getByRole("combobox");
++      expect(selectElement).toBeInTheDocument();
++    });
++  });
++
++  describe("LayoutWrapper", () => {
++    it("renders Player layout (Header & MobileNav) on public routes", () => {
++      mockPathname = "/courts";
++      render(
++        <LayoutWrapper>
++          <div data-testid="child">Public Content</div>
++        </LayoutWrapper>
++      );
++      
++      expect(screen.getByTestId("player-header")).toBeInTheDocument();
++      expect(screen.getByTestId("player-mobile-nav")).toBeInTheDocument();
++      expect(screen.queryByTestId("owner-sidebar")).not.toBeInTheDocument();
++      expect(screen.getByTestId("child")).toBeInTheDocument();
++    });
++
++    it("renders Pro layout (OwnerSidebar) on owner routes", () => {
++      mockPathname = "/owner/dashboard";
++      render(
++        <LayoutWrapper>
++          <div data-testid="child">Owner Content</div>
++        </LayoutWrapper>
++      );
++      
++      expect(screen.queryByTestId("player-header")).not.toBeInTheDocument();
++      expect(screen.queryByTestId("player-mobile-nav")).not.toBeInTheDocument();
++      expect(screen.getByTestId("owner-sidebar")).toBeInTheDocument();
++      expect(screen.getByTestId("child")).toBeInTheDocument();
++    });
++  });
++});
