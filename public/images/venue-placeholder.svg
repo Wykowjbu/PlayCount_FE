@@ -1,0 +1,16 @@
+<svg width="400" height="225" viewBox="0 0 400 225" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="225" fill="url(#bg)" />
+  <rect x="40" y="32" width="320" height="161" rx="8" fill="white" fill-opacity="0.15" stroke="white" stroke-opacity="0.25" stroke-width="1.5" />
+  <line x1="200" y1="32" x2="200" y2="193" stroke="white" stroke-opacity="0.25" stroke-width="1.5" stroke-dasharray="6 4" />
+  <circle cx="200" cy="112" r="20" stroke="white" stroke-opacity="0.15" stroke-width="1.5" fill="none" />
+  <path d="M160 85L180 70V100L160 85Z" fill="white" fill-opacity="0.2" />
+  <path d="M240 85L220 70V100L240 85Z" fill="white" fill-opacity="0.2" />
+  <text x="200" y="225" text-anchor="middle" fill="white" fill-opacity="0.4" font-family="system-ui, sans-serif" font-size="11" font-weight="500">PlayCourt</text>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="400" y2="225" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22C55E" stop-opacity="0.5" />
+      <stop offset="0.5" stop-color="#16A34A" stop-opacity="0.45" />
+      <stop offset="1" stop-color="#15803D" stop-opacity="0.55" />
+    </linearGradient>
+  </defs>
+</svg>

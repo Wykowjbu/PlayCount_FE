@@ -52,3 +52,148 @@ body {
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
+/* Prevent layout shift when scrollbar appears/disappears */
+.scrollbar-gutter-stable {
+  scrollbar-gutter: stable;
+}
+
+/* ===== Radix Select animations ===== */
+
+@keyframes select-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes select-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.98) translateY(-2px);
+  }
+}
+
+@keyframes dropdown-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes dropdown-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.98) translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .select-content[data-state="open"],
+  .select-content[data-state="closed"],
+  [data-radix-dropdown-menu-content][data-state="open"],
+  [data-radix-dropdown-menu-content][data-state="closed"] {
+    animation: none !important;
+  }
+  [layout],
+  [data-motion],
+  [style*="motion"] {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Hide scrollbar for sport chips on mobile */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Reduced motion: disable Motion layout animations */
+@media (prefers-reduced-motion: reduce) {
+  .register-form-compact [layout],
+  .register-form-compact [data-motion],
+  .register-form-compact [style*="transition"] {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Compact register form on shorter desktop viewports */
+/* Moderate compact: viewports ~900px height or less */
+@media (max-height: 820px) and (min-width: 1024px) {
+  .register-form-compact .mb-8 {
+    margin-bottom: 1rem !important;
+  }
+  .register-form-compact .mb-2\.5 {
+    margin-bottom: 0.25rem !important;
+  }
+  .register-form-compact > h1 {
+    margin-bottom: 0.25rem !important;
+  }
+  .register-form-compact .mb-7 {
+    margin-bottom: 1rem !important;
+  }
+  .register-form-compact form {
+    gap: 0.75rem !important;
+  }
+  .register-form-compact form .gap-2 {
+    gap: 0.375rem !important;
+  }
+  .register-form-compact form button[type="submit"] {
+    min-height: 42px !important;
+  }
+  .register-form-compact > .mt-6 {
+    margin-top: 1rem !important;
+  }
+}
+
+/* Aggressive compact: 1366×768 and shorter */
+@media (max-height: 768px) and (min-width: 1024px) {
+  .register-form-compact .mb-8 {
+    margin-bottom: 0.5rem !important;
+  }
+  .register-form-compact .mb-2\.5 {
+    margin-bottom: 0.125rem !important;
+  }
+  .register-form-compact > h1 {
+    margin-bottom: 0.125rem !important;
+  }
+  .register-form-compact .mb-7 {
+    margin-bottom: 0.5rem !important;
+  }
+  .register-form-compact form {
+    gap: 0.5rem !important;
+  }
+  .register-form-compact form .gap-2 {
+    gap: 0.25rem !important;
+  }
+  .register-form-compact form input:not([type="checkbox"]) {
+    min-height: 38px !important;
+  }
+  .register-form-compact form button[type="submit"] {
+    min-height: 42px !important;
+  }
+  .register-form-compact > .mt-6 {
+    margin-top: 0.5rem !important;
+  }
+}
+
