@@ -1,34 +1,43 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  LayoutDashboard, 
-  Trophy, 
+import { useQuery } from "@tanstack/react-query";
+import {
+  LayoutDashboard,
+  Trophy,
   ShieldCheck,
   Dumbbell,
   Sparkles,
-  Settings, 
-  ChevronLeft, 
-  ChevronRight, 
+  Settings,
+  ChevronLeft,
+  ChevronRight,
   MapPin,
   Home
 } from "lucide-react";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { authService } from "@/lib/auth";
+import { api } from "@/lib/api/client";
 
 export function OwnerSidebar() {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [selectedVenue, setSelectedVenue] = useState("venue-1");
+  const [selectedVenue, setSelectedVenue] = useState("");
   const user = authService.getCurrentUser();
 
-  const venues = [
-    { id: "venue-1", name: "Sân Tennis Bình Vị" },
-    { id: "venue-2", name: "Sân Tennis Kỳ Hòa" },
-    { id: "venue-3", name: "Pickleball Hoàng Hoa Thám" },
-  ];
+  const venuesQuery = useQuery({
+    queryKey: ["venues", "my-sidebar"],
+    queryFn: () => api.venues.my(),
+    enabled: !!(user?.role === "CourtOwner" || user?.role === "Admin"),
+  });
+  const venues = venuesQuery.data?.data ?? [];
+
+  useEffect(() => {
+    if (!selectedVenue && venues.length > 0) {
+      setSelectedVenue(String(venues[0].id));
+    }
+  }, [venues, selectedVenue]);
 
   const ownerItems = [
     { name: "Tổng quan", href: "/owner/dashboard", icon: LayoutDashboard },
@@ -98,7 +107,7 @@ export function OwnerSidebar() {
                   className="w-full appearance-none rounded-md border border-[var(--pc-hairline)] bg-[var(--pc-canvas)] py-2 pl-3 pr-8 text-sm font-medium text-[var(--pc-ink)] focus:outline-hidden focus:ring-1 focus:ring-[var(--pc-green-700)] transition-all cursor-pointer"
                 >
                   {venues.map((venue) => (
-                    <option key={venue.id} value={venue.id}>
+                    <option key={venue.id} value={String(venue.id)}>
                       {venue.name}
                     </option>
                   ))}

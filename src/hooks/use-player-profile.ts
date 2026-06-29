@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { api, type UserProfile } from '@/lib/api/client';
+import { api, type BookingStatusCode, type Match, type UserProfile } from '@/lib/api/client';
 
 export type Player = {
   id: string | number;
@@ -12,17 +12,17 @@ export type Player = {
 
 export interface UpdatePlayerInput {
   name?: string;
-  phone?: string;
+  avatarUrl?: string | null;
 }
 
 export interface PlayerBooking {
-  id: string;
+  id: string | number;
   venueName: string;
   courtName: string;
   date: string;
   startTime: string;
   endTime: string;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  status: string;
   totalPrice: number;
 }
 
@@ -34,7 +34,7 @@ export interface BookingsResponse {
 }
 
 export interface PlayerMatch {
-  id: string;
+  id: string | number;
   title: string;
   venueName: string;
   date: string;
@@ -42,7 +42,7 @@ export interface PlayerMatch {
   endTime: string;
   currentPlayers: number;
   maxPlayers: number;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  status: string;
   isCreator: boolean;
 }
 
@@ -56,7 +56,7 @@ export interface MatchesResponse {
 export interface PlayerStats {
   totalMatches: number;
   totalHoursPlayed: number;
-  favoriteVenue: { id: string; name: string; bookingCount: number } | null;
+  favoriteVenue: { id: string | number; name: string; bookingCount?: number } | null;
   totalBookings: number;
   completedBookings: number;
 }
@@ -87,7 +87,7 @@ export function useUpdatePlayer() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (input: UpdatePlayerInput) => {
-      const response = await api.users.updateMe({ fullName: input.name });
+      const response = await api.users.updateMe({ fullName: input.name, avatarUrl: input.avatarUrl });
       if (!response.data) throw new Error(response.message || 'Không thể cập nhật hồ sơ.');
       return mapProfile(response.data);
     },
@@ -97,41 +97,102 @@ export function useUpdatePlayer() {
   });
 }
 
-export function useUploadAvatar() {
-  return useMutation({
-    mutationFn: async (file: File) => {
-      void file;
-      throw new Error('Backend hiện chưa có API upload avatar. Hãy nhập avatar URL qua hồ sơ khi BE hỗ trợ.');
+export function usePlayerBookings(page?: number, status?: string) {
+  return useQuery<BookingsResponse>({
+    queryKey: ['bookings', 'me', page ?? 1, status ?? 'all'],
+    queryFn: async () => {
+      const statusMap: Record<string, BookingStatusCode | undefined> = {
+        all: undefined,
+        pending: 0,
+        confirmed: 1,
+        completed: 2,
+        cancelled: 3,
+      };
+      const response = await api.bookings.me({
+        Page: page ?? 1,
+        PageSize: 10,
+        Status: statusMap[status ?? 'all'],
+      });
+      const bookings = (response.data ?? []).map((booking) => ({
+        id: booking.id,
+        venueName: booking.venueName,
+        courtName: booking.courtName,
+        date: booking.startAt,
+        startTime: new Date(booking.startAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Ho_Chi_Minh' }),
+        endTime: new Date(booking.endAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Ho_Chi_Minh' }),
+        status: booking.status,
+        totalPrice: booking.totalPrice,
+      }));
+      return {
+        bookings,
+        total: response.totalCount,
+        page: response.pageIndex,
+        totalPages: response.totalPages,
+      };
     },
   });
 }
 
-export function usePlayerBookings(page?: number, status?: string) {
-  void page;
-  void status;
-  return useQuery<BookingsResponse>({
-    queryKey: ['unsupported', 'bookings'],
-    queryFn: async () => ({ bookings: [], total: 0, page: 1, totalPages: 0 }),
-  });
-}
-
 export function usePlayerMatches(page?: number) {
-  void page;
   return useQuery<MatchesResponse>({
-    queryKey: ['unsupported', 'matches'],
-    queryFn: async () => ({ matches: [], total: 0, page: 1, totalPages: 0 }),
+    queryKey: ['matches', 'me-ish', page ?? 1],
+    queryFn: async () => {
+      const response = await api.matches.search({ PageIndex: 1, PageSize: 200, IncludeFull: true });
+      const allMine = (response.data ?? []).filter((match) => match.isHost || match.isParticipant);
+      const pageIndex = page ?? 1;
+      const pageSize = 10;
+      const start = (pageIndex - 1) * pageSize;
+      const paged = allMine.slice(start, start + pageSize);
+      return {
+        matches: paged.map(mapMatch),
+        total: allMine.length,
+        page: pageIndex,
+        totalPages: Math.ceil(allMine.length / pageSize) || 1,
+      };
+    },
   });
 }
 
 export function usePlayerStats() {
   return useQuery<PlayerStats>({
-    queryKey: ['unsupported', 'stats'],
-    queryFn: async () => ({
-      totalMatches: 0,
-      totalHoursPlayed: 0,
-      favoriteVenue: null,
-      totalBookings: 0,
-      completedBookings: 0,
-    }),
+    queryKey: ['players', 'stats', 'derived'],
+    queryFn: async () => {
+      const [bookingResponse, matchResponse, favoritesResponse] = await Promise.all([
+        api.bookings.me({ Page: 1, PageSize: 100 }),
+        api.matches.search({ PageIndex: 1, PageSize: 100, IncludeFull: true }),
+        api.venues.favorites().catch(() => ({ data: [] })),
+      ]);
+      const bookings = bookingResponse.data ?? [];
+      const completedBookings = bookings.filter((booking) => booking.status.toLowerCase() === 'completed');
+      const totalHoursPlayed = completedBookings.reduce((total, booking) => {
+        const duration = new Date(booking.endAt).getTime() - new Date(booking.startAt).getTime();
+        return total + Math.max(0, duration / 36e5);
+      }, 0);
+      const favoriteVenue = favoritesResponse.data?.[0]
+        ? { id: favoritesResponse.data[0].id, name: favoritesResponse.data[0].name }
+        : null;
+      return {
+        totalMatches: (matchResponse.data ?? []).filter((match) => match.isHost || match.isParticipant).length,
+        totalHoursPlayed: Number(totalHoursPlayed.toFixed(1)),
+        favoriteVenue,
+        totalBookings: bookingResponse.totalCount,
+        completedBookings: completedBookings.length,
+      };
+    },
   });
+}
+
+function mapMatch(match: Match): PlayerMatch {
+  return {
+    id: match.id,
+    title: `${match.sportName} - ${match.venueName || match.locationDescription || 'Địa điểm tự chọn'}`,
+    venueName: match.venueName || match.locationDescription || 'Địa điểm tự chọn',
+    date: match.startAt,
+    startTime: new Date(match.startAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Ho_Chi_Minh' }),
+    endTime: new Date(match.endAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Ho_Chi_Minh' }),
+    currentPlayers: match.participantCount,
+    maxPlayers: match.maxParticipants,
+    status: match.status,
+    isCreator: match.isHost,
+  };
 }

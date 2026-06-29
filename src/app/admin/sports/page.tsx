@@ -21,11 +21,16 @@ export default function AdminSportsPage() {
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
-    const payload = { code: form.code.trim(), name: form.name.trim(), description: form.description || null, playerCount: form.playerCount ? Number(form.playerCount) : null };
-    if (form.id) await api.sports.update(form.id, { ...payload, isActive: true });
-    else await api.sports.create(payload);
-    setForm({ id: 0, code: "", name: "", description: "", playerCount: "" });
-    load();
+    setError("");
+    try {
+      const payload = { code: form.code.trim(), name: form.name.trim(), description: form.description || null, playerCount: form.playerCount ? Number(form.playerCount) : null };
+      if (form.id) await api.sports.update(form.id, { ...payload, isActive: true });
+      else await api.sports.create(payload);
+      setForm({ id: 0, code: "", name: "", description: "", playerCount: "" });
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Không thể lưu sport.");
+    }
   };
 
   return (
@@ -43,7 +48,7 @@ export default function AdminSportsPage() {
         {loading ? <p className="p-4">Đang tải...</p> : sports.map((sport) => (
           <div key={sport.id} className="flex items-center justify-between border-t border-[var(--pc-hairline)] p-4 first:border-t-0">
             <div><p className="font-semibold">{sport.name}</p><p className="text-xs text-[var(--pc-mute)]">{sport.code} · {sport.isActive ? "Active" : "Inactive"}</p></div>
-            <div className="flex gap-2"><Button variant="Secondary" type="button" onClick={() => setForm({ id: sport.id, code: sport.code ?? "", name: sport.name, description: sport.description ?? "", playerCount: sport.playerCount == null ? "" : String(sport.playerCount) })}>Sửa</Button><Button variant="Secondary" type="button" onClick={async () => { await api.sports.toggle(sport.id); load(); }}>Bật/tắt</Button></div>
+            <div className="flex gap-2"><Button variant="Secondary" type="button" onClick={() => setForm({ id: sport.id, code: sport.code ?? "", name: sport.name, description: sport.description ?? "", playerCount: sport.playerCount == null ? "" : String(sport.playerCount) })}>Sửa</Button><Button variant="Secondary" type="button" onClick={async () => { try { await api.sports.toggle(sport.id); load(); } catch (err) { setError(err instanceof Error ? err.message : "Không thể toggle sport."); } }}>Bật/tắt</Button></div>
           </div>
         ))}
       </div>

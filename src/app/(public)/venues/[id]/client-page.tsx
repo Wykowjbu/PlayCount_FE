@@ -15,8 +15,12 @@ import {
   type CourtSchedule,
   type OpeningHour,
   type PricingRule,
+  type Review,
+  type ReviewStats,
   type Venue,
+  type BookingAvailability,
 } from "@/lib/api/client";
+import { useBookingStore } from "@/stores/booking-store";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -45,11 +49,20 @@ export default function VenueDetailPage({ params }: PageProps) {
   const [activeCourtId, setActiveCourtId] = useState<string | number | null>(null);
   const [pricingRules, setPricingRules] = useState<PricingRule[]>([]);
   const [schedules, setSchedules] = useState<CourtSchedule[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewStats, setReviewStats] = useState<ReviewStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [courtLoading, setCourtLoading] = useState(false);
   const [error, setError] = useState("");
   const [favoriteLoading, setFavoriteLoading] = useState(false);
+  const [bookingDate, setBookingDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [bookingStart, setBookingStart] = useState("18:00");
+  const [bookingEnd, setBookingEnd] = useState("19:00");
+  const [availability, setAvailability] = useState<BookingAvailability | null>(null);
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [bookingError, setBookingError] = useState("");
   const [message, setMessage] = useState("");
+  const updateDraft = useBookingStore((state) => state.updateDraft);
 
   useEffect(() => {
     let alive = true;
@@ -59,12 +72,17 @@ export default function VenueDetailPage({ params }: PageProps) {
       api.venues.detail(id),
       api.venues.openingHours(id).catch(() => ({ data: [] })),
       api.courts.list(id).catch(() => ({ data: [] })),
+      api.reviews.venueStats(id).catch(() => ({ data: null })),
+      api.reviews.venue(id, 1, 10).catch(() => ({ data: [] })),
     ])
-      .then(([venueResponse, hoursResponse, courtsResponse]) => {
+      .then(([venueResponse, hoursResponse, courtsResponse, statsResponse, reviewsResponse]) => {
         if (!alive) return;
         setVenue(venueResponse.data);
         setOpeningHours(hoursResponse.data ?? []);
         setCourts(courtsResponse.data ?? []);
+        setActiveCourtId(courtsResponse.data?.[0]?.id ?? null);
+        setReviewStats(statsResponse.data ?? null);
+        setReviews(reviewsResponse.data ?? []);
       })
       .catch((err) => {
         if (alive) setError(err instanceof Error ? err.message : "Không thể tải chi tiết sân.");
@@ -124,6 +142,66 @@ export default function VenueDetailPage({ params }: PageProps) {
       setMessage(err instanceof Error ? err.message : "Không thể cập nhật yêu thích.");
     } finally {
       setFavoriteLoading(false);
+    }
+  };
+
+  const buildBookingRange = () => {
+    const start = new Date(`${bookingDate}T${bookingStart}:00`);
+    const end = new Date(`${bookingDate}T${bookingEnd}:00`);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      throw new Error("Vui lòng chọn ngày giờ hợp lệ.");
+    }
+    if (end <= start) {
+      throw new Error("Giờ kết thúc phải sau giờ bắt đầu.");
+    }
+    return { startAt: start.toISOString(), endAt: end.toISOString() };
+  };
+
+  const checkAvailabilityAndCheckout = async () => {
+    setBookingError("");
+    setMessage("");
+    setAvailability(null);
+    if (!venue || !activeCourtId) {
+      setBookingError("Vui lòng chọn sân con.");
+      return;
+    }
+    const user = getStoredUser();
+    if (!user) {
+      router.push(`/login?next=/venues/${venue.id}`);
+      return;
+    }
+    if (user.role !== "Player") {
+      setBookingError("Chỉ tài khoản Player mới có thể đặt sân.");
+      return;
+    }
+
+    setAvailabilityLoading(true);
+    try {
+      const range = buildBookingRange();
+      const response = await api.bookings.availability(activeCourtId, range);
+      const result = response.data;
+      if (!result) throw new Error(response.message || "Không thể kiểm tra lịch trống.");
+      setAvailability(result);
+      if (!result.isAvailable) {
+        setBookingError(result.reason || "Khung giờ này không còn trống.");
+        return;
+      }
+      const court = courts.find((item) => item.id === activeCourtId);
+      updateDraft({
+        venueId: Number(venue.id),
+        courtId: Number(activeCourtId),
+        venueName: venue.name,
+        courtName: court?.name ?? `Court #${activeCourtId}`,
+        startAt: result.startAt || range.startAt,
+        endAt: result.endAt || range.endAt,
+        estimatedPrice: result.estimatedPrice ?? null,
+        note: "",
+      });
+      router.push("/bookings/checkout");
+    } catch (err) {
+      setBookingError(err instanceof Error ? err.message : "Không thể kiểm tra lịch trống.");
+    } finally {
+      setAvailabilityLoading(false);
     }
   };
 
@@ -221,12 +299,81 @@ export default function VenueDetailPage({ params }: PageProps) {
               </div>
             )}
           </section>
+
+          <section className="rounded-[12px] border border-[var(--pc-hairline)] bg-white p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-lg font-bold text-[var(--pc-ink)]">Đánh giá</h2>
+              {reviewStats && (
+                <p className="text-sm font-semibold text-[var(--pc-body)]">
+                  {reviewStats.averageRating.toFixed(1)}/5 · {reviewStats.totalReviews} reviews
+                </p>
+              )}
+            </div>
+            <div className="mt-4 divide-y divide-[var(--pc-hairline)]">
+              {reviews.length ? reviews.map((review) => (
+                <article key={review.id} className="py-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="font-semibold text-[var(--pc-ink)]">{review.playerName}</p>
+                    <p className="text-sm font-semibold text-[var(--pc-green-800)]">{review.rating}/5</p>
+                  </div>
+                  {review.reviewText && <p className="mt-2 text-sm leading-6 text-[var(--pc-body)]">{review.reviewText}</p>}
+                  {review.images.length > 0 && (
+                    <div className="mt-3 flex gap-2 overflow-x-auto">
+                      {review.images.map((image) => <img key={image.id} src={image.imageUrl} alt="" className="h-20 w-20 rounded-[6px] object-cover" />)}
+                    </div>
+                  )}
+                </article>
+              )) : <p className="py-4 text-sm text-[var(--pc-mute)]">Chưa có review.</p>}
+            </div>
+          </section>
         </main>
 
         <aside className="h-fit rounded-[12px] border border-[var(--pc-hairline)] bg-white p-6">
           <p className="text-xs font-bold uppercase tracking-wider text-[var(--pc-mute)]">Trạng thái venue</p>
-          <p className="mt-1 text-lg font-bold text-[var(--pc-ink)]">{venue.status ?? "Approved"}</p>
-          <Button type="button" disabled className="mt-5 w-full">Booking chưa có API</Button>
+          <p className="mt-1 text-lg font-bold text-[var(--pc-ink)]">{venue.status != null ? ({ "0": "Pending", "1": "Approved", "2": "Rejected", "3": "Suspended" }[String(venue.status)] ?? String(venue.status)) : "Approved"}</p>
+          <div className="mt-5 grid gap-3">
+            <label className="grid gap-1 text-xs font-semibold text-[var(--pc-body)]">
+              Sân con
+              <select
+                value={activeCourtId == null ? "" : String(activeCourtId)}
+                onChange={(event) => setActiveCourtId(Number(event.target.value))}
+                className="h-10 rounded-[6px] border border-[var(--pc-hairline)] bg-white px-3 text-sm"
+              >
+                <option value="">Chọn sân</option>
+                {courts.map((court) => (
+                  <option key={court.id} value={court.id}>{court.name}</option>
+                ))}
+              </select>
+            </label>
+            <label className="grid gap-1 text-xs font-semibold text-[var(--pc-body)]">
+              Ngày
+              <input
+                type="date"
+                value={bookingDate}
+                onChange={(event) => setBookingDate(event.target.value)}
+                className="h-10 rounded-[6px] border border-[var(--pc-hairline)] px-3 text-sm"
+              />
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="grid gap-1 text-xs font-semibold text-[var(--pc-body)]">
+                Bắt đầu
+                <input type="time" value={bookingStart} onChange={(event) => setBookingStart(event.target.value)} className="h-10 rounded-[6px] border border-[var(--pc-hairline)] px-3 text-sm" />
+              </label>
+              <label className="grid gap-1 text-xs font-semibold text-[var(--pc-body)]">
+                Kết thúc
+                <input type="time" value={bookingEnd} onChange={(event) => setBookingEnd(event.target.value)} className="h-10 rounded-[6px] border border-[var(--pc-hairline)] px-3 text-sm" />
+              </label>
+            </div>
+            <Button type="button" disabled={availabilityLoading || !activeCourtId} onClick={checkAvailabilityAndCheckout} className="w-full">
+              {availabilityLoading ? "Đang kiểm tra..." : "Kiểm tra và đặt sân"}
+            </Button>
+            {availability?.estimatedPrice != null && (
+              <p className="rounded-[6px] bg-[var(--pc-green-50)] p-3 text-sm font-semibold text-[var(--pc-green-900)]">
+                Giá dự kiến: {formatMoney(availability.estimatedPrice)}
+              </p>
+            )}
+            {bookingError && <p className="rounded-[6px] bg-red-50 p-3 text-sm text-red-800">{bookingError}</p>}
+          </div>
           <Button type="button" variant="Secondary" disabled={favoriteLoading} onClick={toggleFavorite} className="mt-3 w-full">
             {favoriteLoading ? "Đang lưu..." : venue.isFavorite ? "Bỏ yêu thích" : "Lưu yêu thích"}
           </Button>

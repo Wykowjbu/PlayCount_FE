@@ -3,6 +3,7 @@
 /* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/playcourt/button";
 import { Input } from "@/components/playcourt/input";
 import {
@@ -341,6 +342,18 @@ export default function OwnerVenuesPage() {
           {selectedVenue && (
             <>
               <div className="rounded-[8px] border border-[var(--pc-hairline)] bg-white p-5">
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-lg font-bold text-[var(--pc-ink)]">Staff</h2>
+                    <p className="text-sm text-[var(--pc-mute)]">Quản lý staff bằng VenueStaff API.</p>
+                  </div>
+                  <Link className="rounded-[6px] bg-[var(--pc-green-800)] px-4 py-2 text-sm font-semibold text-white" href={`/owner/venues/${selectedVenue.id}/staff`}>
+                    Mở staff
+                  </Link>
+                </div>
+              </div>
+
+              <div className="rounded-[8px] border border-[var(--pc-hairline)] bg-white p-5">
                 <h2 className="text-lg font-bold text-[var(--pc-ink)]">Ảnh venue</h2>
                 <div className="mt-3 grid gap-3 md:grid-cols-[1fr_auto]">
                   <Input label="Image URL" type="url" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
@@ -399,7 +412,7 @@ export default function OwnerVenuesPage() {
                       <Input label="Effective to" type="datetime-local" value={pricingForm.effectiveTo} onChange={(e) => setPricingForm({ ...pricingForm, effectiveTo: e.target.value })} />
                       <Button type="submit">Thêm pricing rule</Button>
                     </form>
-                    <ul className="mt-4 divide-y divide-[var(--pc-hairline)] text-sm">{pricingRules.map((rule) => <li key={rule.id} className="flex justify-between py-2"><span>Ngày {rule.dayOfWeek} · {rule.startTime}-{rule.endTime} · {rule.pricePerHour}</span><button className="text-red-700" onClick={async () => { if (confirm("Xóa pricing rule?")) { await api.pricingRules.delete(rule.id); setPricingRules((await api.courts.pricingRules(activeCourtId)).data ?? []); } }}>Xóa</button></li>)}</ul>
+                    <ul className="mt-4 divide-y divide-[var(--pc-hairline)] text-sm">{pricingRules.map((rule) => <li key={rule.id} className="flex justify-between py-2"><span>Ngày {rule.dayOfWeek} · {rule.startTime}-{rule.endTime} · {rule.pricePerHour}</span><button className="text-red-700" onClick={async () => { if (confirm("Xóa pricing rule?")) { try { await api.pricingRules.delete(rule.id); setPricingRules((await api.courts.pricingRules(activeCourtId)).data ?? []); } catch (err) { setError(err instanceof Error ? err.message : "Không thể xóa pricing rule."); } } }}>Xóa</button></li>)}</ul>
                   </section>
 
                   <section className="rounded-[8px] border border-[var(--pc-hairline)] bg-white p-5">
@@ -410,7 +423,7 @@ export default function OwnerVenuesPage() {
                       <Input label="Reason" value={scheduleForm.reason} onChange={(e) => setScheduleForm({ ...scheduleForm, reason: e.target.value })} />
                       <Button type="submit">Thêm lịch khóa</Button>
                     </form>
-                    <ul className="mt-4 divide-y divide-[var(--pc-hairline)] text-sm">{schedules.map((item) => <li key={item.id} className="flex justify-between gap-3 py-2"><span>{new Date(item.startAt).toLocaleString("vi-VN")} - {new Date(item.endAt).toLocaleString("vi-VN")} · {item.reason}</span><button className="text-red-700" onClick={async () => { if (confirm("Xóa schedule?")) { await api.schedules.delete(item.id); setSchedules((await api.courts.schedules(activeCourtId)).data ?? []); } }}>Xóa</button></li>)}</ul>
+                    <ul className="mt-4 divide-y divide-[var(--pc-hairline)] text-sm">{schedules.map((item) => <li key={item.id} className="flex justify-between gap-3 py-2"><span>{new Date(item.startAt).toLocaleString("vi-VN")} - {new Date(item.endAt).toLocaleString("vi-VN")} · {item.reason}</span><button className="text-red-700" onClick={async () => { if (confirm("Xóa schedule?")) { try { await api.schedules.delete(item.id); setSchedules((await api.courts.schedules(activeCourtId)).data ?? []); } catch (err) { setError(err instanceof Error ? err.message : "Không thể xóa schedule."); } } }}>Xóa</button></li>)}</ul>
                   </section>
                 </div>
               )}

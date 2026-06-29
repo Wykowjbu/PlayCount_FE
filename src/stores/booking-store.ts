@@ -1,27 +1,25 @@
 import { create } from 'zustand';
 
 export interface BookingDraft {
+  venueId: number | null;
+  courtId: number | null;
   venueName: string;
   courtName: string;
-  date: string;
-  timeSlots: string[];
-  total: number;
-  contactName: string;
-  contactPhone: string;
+  startAt: string;
+  endAt: string;
+  estimatedPrice: number | null;
   note: string;
-  paymentMethod: 'card' | 'wallet' | 'bank-transfer';
 }
 
 export const initialBookingDraft: BookingDraft = {
+  venueId: null,
+  courtId: null,
   venueName: '',
   courtName: '',
-  date: '',
-  timeSlots: [],
-  total: 0,
-  contactName: '',
-  contactPhone: '',
+  startAt: '',
+  endAt: '',
+  estimatedPrice: null,
   note: '',
-  paymentMethod: 'card',
 };
 
 interface BookingStore {

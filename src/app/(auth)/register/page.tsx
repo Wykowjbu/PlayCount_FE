@@ -36,7 +36,7 @@ export default function RegisterPage() {
         email: formData.email.trim(),
         phoneNumber: formData.phone.trim(),
         password: formData.password,
-        role: role === 'owner' ? 'Owner' : 'Player',
+        role: role === 'owner' ? 'CourtOwner' : 'Player',
         businessName: role === 'owner' ? formData.businessName.trim() : null,
       })
       setMessage(response.message || 'Đăng ký thành công. Vui lòng xác minh email.')

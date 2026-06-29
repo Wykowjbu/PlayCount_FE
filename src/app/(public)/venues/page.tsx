@@ -2,7 +2,7 @@
 
 /* eslint-disable react-hooks/set-state-in-effect */
 
-import React, { Suspense, useEffect, useMemo, useState } from "react";
+import React, { Suspense, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/playcourt/button";
 import { Input } from "@/components/playcourt/input";
@@ -13,7 +13,7 @@ function VenuesSearchContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [keyword, setKeyword] = useState(searchParams.get("Keyword") ?? "");
-  const [debouncedKeyword, setDebouncedKeyword] = useState(keyword);
+  const debouncedKeyword = useDeferredValue(keyword.trim());
   const [sportId, setSportId] = useState(searchParams.get("SportId") ?? "");
   const [isOpenNow, setIsOpenNow] = useState(searchParams.get("IsOpenNow") ?? "");
   const [pageIndex, setPageIndex] = useState(Number(searchParams.get("PageIndex") ?? "1") || 1);
@@ -25,10 +25,14 @@ function VenuesSearchContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Sync state from URL when it changes (e.g. browser Back/Forward)
   useEffect(() => {
-    const id = window.setTimeout(() => setDebouncedKeyword(keyword.trim()), 350);
-    return () => window.clearTimeout(id);
-  }, [keyword]);
+    setKeyword(searchParams.get("Keyword") ?? "");
+    setSportId(searchParams.get("SportId") ?? "");
+    setIsOpenNow(searchParams.get("IsOpenNow") ?? "");
+    setPageIndex(Number(searchParams.get("PageIndex") ?? "1") || 1);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   useEffect(() => {
     api.sports.list(true).then((response) => setSports(response.data ?? [])).catch(() => setSports([]));
@@ -75,7 +79,6 @@ function VenuesSearchContent() {
 
   const resetFilters = () => {
     setKeyword("");
-    setDebouncedKeyword("");
     setSportId("");
     setIsOpenNow("");
     setPageIndex(1);
