@@ -1,0 +1,8 @@
+[browser] Backend API not reachable or failed, falling back to mock data. TimeoutError: signal timed out
+TimeoutError: signal timed out (src/lib/api/client.ts:116:13)
+[browser] Backend API not reachable or failed, falling back to mock data. TimeoutError: signal timed out
+TimeoutError: signal timed out (src/lib/api/client.ts:116:13)
+[browser] Backend API not reachable or failed, falling back to mock data. TimeoutError: signal timed out
+TimeoutError: signal timed out (src/lib/api/client.ts:116:13)
+[browser] Backend API not reachable or failed, falling back to mock data. TimeoutError: signal timed out
+TimeoutError: signal timed out (src/lib/api/client.ts:116:13)

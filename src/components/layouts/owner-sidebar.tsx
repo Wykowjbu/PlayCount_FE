@@ -5,10 +5,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, 
-  Calendar, 
   Trophy, 
-  CreditCard, 
-  BarChart, 
+  ShieldCheck,
+  Dumbbell,
+  Sparkles,
   Settings, 
   ChevronLeft, 
   ChevronRight, 
@@ -16,11 +16,13 @@ import {
   Home
 } from "lucide-react";
 import * as Tooltip from "@radix-ui/react-tooltip";
+import { authService } from "@/lib/auth";
 
 export function OwnerSidebar() {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selectedVenue, setSelectedVenue] = useState("venue-1");
+  const user = authService.getCurrentUser();
 
   const venues = [
     { id: "venue-1", name: "Sân Tennis Bình Vị" },
@@ -28,14 +30,17 @@ export function OwnerSidebar() {
     { id: "venue-3", name: "Pickleball Hoàng Hoa Thám" },
   ];
 
-  const menuItems = [
-    { name: "Tổng quan", href: "/owner", icon: LayoutDashboard },
-    { name: "Lịch đặt", href: "/owner/calendar", icon: Calendar },
-    { name: "Danh sách sân", href: "/owner/courts", icon: Trophy },
-    { name: "Đơn đặt sân", href: "/owner/bookings", icon: CreditCard },
-    { name: "Doanh thu", href: "/owner/revenue", icon: BarChart },
-    { name: "Cấu hình", href: "/owner/settings", icon: Settings },
+  const ownerItems = [
+    { name: "Tổng quan", href: "/owner/dashboard", icon: LayoutDashboard },
+    { name: "Venue của tôi", href: "/owner/venues", icon: Trophy },
   ];
+  const adminItems = [
+    { name: "Duyệt chủ sân", href: "/admin/kyc", icon: ShieldCheck },
+    { name: "Duyệt venue", href: "/admin/moderation", icon: Settings },
+    { name: "Sports", href: "/admin/sports", icon: Dumbbell },
+    { name: "Amenities", href: "/admin/amenities", icon: Sparkles },
+  ];
+  const menuItems = user?.role === "Admin" ? adminItems : ownerItems;
 
   return (
     <Tooltip.Provider>

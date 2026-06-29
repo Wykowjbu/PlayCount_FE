@@ -4,6 +4,7 @@ import "./globals.css";
 import { QueryProvider } from "@/providers/query-provider";
 import { MotionProvider } from "@/providers/motion-provider";
 import { LayoutWrapper } from "@/components/layouts/layout-wrapper";
+import { AuthProvider } from "@/contexts/auth-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,11 +33,13 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <QueryProvider>
-          <MotionProvider>
-            <LayoutWrapper>
-              {children}
-            </LayoutWrapper>
-          </MotionProvider>
+          <AuthProvider>
+            <MotionProvider>
+              <LayoutWrapper>
+                {children}
+              </LayoutWrapper>
+            </MotionProvider>
+          </AuthProvider>
         </QueryProvider>
       </body>
     </html>

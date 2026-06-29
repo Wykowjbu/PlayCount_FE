@@ -13,7 +13,7 @@ export function PlayerMobileNav() {
 
   const tabs = [
     { name: "Home", href: "/", icon: Home },
-    { name: "Sân", href: "/courts", icon: MapPin },
+    { name: "Sân", href: "/venues", icon: MapPin },
     { name: "Trận", href: "/matches", icon: Trophy },
     { name: "Tôi", href: "/profile", icon: User },
   ];
