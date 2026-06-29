@@ -48,3 +48,9 @@ codex-fe.err.log
 codex-fe.out.log
 dev-server.err.log
 dev-server.out.log
+
+# Claude Code / AI agent artifacts
+.agents/
+.claude/
+skills-lock.json
+AGENTS.md

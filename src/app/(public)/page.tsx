@@ -10,6 +10,7 @@ import { Select } from "@/components/ui/select";
 import { api, fetchVenues, getVenueImage, getVenueSportName, type Sport, type Venue } from "@/lib/api/client";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { ChevronDown, Check } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
 
 const VENUE_TIMEOUT_MS = 15_000;
 const MAX_VISIBLE_SPORTS = 6;
@@ -172,6 +173,12 @@ export default function HomePage() {
     return "Chưa cập nhật giờ hoạt động";
   };
 
+  const shouldReduceMotion = useReducedMotion();
+
+  const pillTransition = shouldReduceMotion
+    ? { duration: 0 }
+    : { type: "spring" as const, stiffness: 300, damping: 30 };
+
   return (
     <div className="flex flex-col min-h-screen bg-[var(--pc-canvas)]">
       {/* Hero Section */}
@@ -254,37 +261,50 @@ export default function HomePage() {
 
             {/* Desktop Sport Chips — show when sports loaded */}
             {showAllChip && (
-              <div className="hidden md:flex flex-wrap gap-1 bg-[var(--pc-hairline-soft)] p-1 rounded-[8px] border border-[var(--pc-hairline)] self-start md:self-auto max-w-full">
+              <div
+                className="hidden md:flex flex-wrap gap-1 bg-[var(--pc-hairline-soft)] p-1 rounded-[8px] border border-[var(--pc-hairline)] self-start md:self-auto max-w-full"
+                aria-label="Lọc sân theo môn thể thao"
+                role="group"
+              >
                 {/* Tất cả chip */}
                 <button
                   type="button"
                   onClick={() => handleSportTabClick("")}
-                  className={`px-3 py-1 text-xs font-bold rounded-[6px] transition-colors cursor-pointer shrink-0 ${
-                    activeSportTab === ""
-                      ? "bg-[var(--pc-tennis)] text-[var(--pc-green-950)] shadow-sm"
-                      : "text-[var(--pc-body)] hover:text-[var(--pc-ink)]"
-                  }`}
+                  className="relative isolate px-3 py-1 text-xs font-bold rounded-[6px] cursor-pointer shrink-0 text-[var(--pc-body)] hover:text-[var(--pc-ink)] transition-colors duration-150"
                   aria-pressed={activeSportTab === ""}
                 >
-                  Tất cả
+                  {activeSportTab === "" && (
+                    <motion.span
+                      layoutId="home-sport-filter-active-pill"
+                      className="absolute inset-0 rounded-[6px] bg-[var(--pc-tennis)] shadow-sm"
+                      transition={pillTransition}
+                    />
+                  )}
+                  <span className="relative z-10">Tất cả</span>
                 </button>
 
                 {/* Visible sports */}
-                {visibleSports.map((s) => (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => handleSportTabClick(String(s.id))}
-                    className={`px-3 py-1 text-xs font-bold rounded-[6px] transition-colors cursor-pointer shrink-0 ${
-                      activeSportTab === String(s.id)
-                        ? "bg-[var(--pc-tennis)] text-[var(--pc-green-950)] shadow-sm"
-                        : "text-[var(--pc-body)] hover:text-[var(--pc-ink)]"
-                    }`}
-                    aria-pressed={activeSportTab === String(s.id)}
-                  >
-                    {s.name}
-                  </button>
-                ))}
+                {visibleSports.map((s) => {
+                  const isActive = activeSportTab === String(s.id);
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => handleSportTabClick(String(s.id))}
+                      className="relative isolate px-3 py-1 text-xs font-bold rounded-[6px] cursor-pointer shrink-0 text-[var(--pc-body)] hover:text-[var(--pc-ink)] transition-colors duration-150"
+                      aria-pressed={isActive}
+                    >
+                      {isActive && (
+                        <motion.span
+                          layoutId="home-sport-filter-active-pill"
+                          className="absolute inset-0 rounded-[6px] bg-[var(--pc-tennis)] shadow-sm"
+                          transition={pillTransition}
+                        />
+                      )}
+                      <span className="relative z-10">{s.name}</span>
+                    </button>
+                  );
+                })}
 
                 {/* Xem thêm dropdown */}
                 {hasExtraSports && (
@@ -292,14 +312,21 @@ export default function HomePage() {
                     <DropdownMenu.Trigger asChild>
                       <button
                         type="button"
-                        className="inline-flex items-center gap-1 px-3 py-1 text-xs font-bold rounded-[6px] transition-colors cursor-pointer text-[var(--pc-green-800)] hover:bg-[var(--pc-green-50)] shrink-0 max-w-[120px] truncate"
+                        className="relative isolate inline-flex items-center gap-1 px-3 py-1 text-xs font-bold rounded-[6px] cursor-pointer text-[var(--pc-body)] hover:text-[var(--pc-ink)] transition-colors duration-150 shrink-0 max-w-[120px]"
                       >
-                        <span className="truncate">
+                        {activeSportInExtra && (
+                          <motion.span
+                            layoutId="home-sport-filter-active-pill"
+                            className="absolute inset-0 rounded-[6px] bg-[var(--pc-tennis)] shadow-sm"
+                            transition={pillTransition}
+                          />
+                        )}
+                        <span className="relative z-10 truncate">
                           {activeSportInExtra && activeExtraSportName
                             ? activeExtraSportName
                             : "Xem thêm"}
                         </span>
-                        <ChevronDown className="h-3 w-3 shrink-0" aria-hidden="true" />
+                        <ChevronDown className="relative z-10 h-3 w-3 shrink-0" aria-hidden="true" />
                       </button>
                     </DropdownMenu.Trigger>
                     <DropdownMenu.Portal>
@@ -348,34 +375,44 @@ export default function HomePage() {
 
           {/* Mobile Sport Chips */}
           {showAllChip && (
-            <div className="flex md:hidden gap-1 overflow-x-auto flex-nowrap hide-scrollbar -mx-6 px-6 pb-1">
-              <button
-                type="button"
-                onClick={() => handleSportTabClick("")}
-                className={`shrink-0 px-3 py-1.5 text-xs font-bold rounded-[6px] transition-colors cursor-pointer ${
-                  activeSportTab === ""
-                    ? "bg-[var(--pc-tennis)] text-[var(--pc-green-950)] shadow-sm"
-                    : "bg-[var(--pc-hairline-soft)] text-[var(--pc-body)] hover:text-[var(--pc-ink)] border border-[var(--pc-hairline)]"
-                }`}
-                aria-pressed={activeSportTab === ""}
-              >
-                Tất cả
-              </button>
-              {sports.map((s) => (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => handleSportTabClick(String(s.id))}
-                  className={`shrink-0 px-3 py-1.5 text-xs font-bold rounded-[6px] transition-colors cursor-pointer ${
-                    activeSportTab === String(s.id)
-                      ? "bg-[var(--pc-tennis)] text-[var(--pc-green-950)] shadow-sm"
-                      : "bg-[var(--pc-hairline-soft)] text-[var(--pc-body)] hover:text-[var(--pc-ink)] border border-[var(--pc-hairline)]"
-                  }`}
-                  aria-pressed={activeSportTab === String(s.id)}
-                >
-                  {s.name}
-                </button>
-              ))}
+            <div className="flex md:hidden gap-1 overflow-x-auto flex-nowrap hide-scrollbar -mx-6 px-6 pb-1" role="group" aria-label="Lọc sân theo môn thể thao">
+              {(() => {
+                const mobileSportIds = [{ id: "", name: "Tất cả" }, ...sports];
+                return mobileSportIds.map((s) => {
+                  const id = String(s.id);
+                  const isActive = activeSportTab === id;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      ref={(el) => {
+                        if (isActive && el) {
+                          // Scroll active chip into view with a small delay for layout settle
+                          requestAnimationFrame(() => {
+                            el.scrollIntoView({
+                              behavior: shouldReduceMotion ? "auto" : "smooth",
+                              block: "nearest",
+                              inline: "center",
+                            });
+                          });
+                        }
+                      }}
+                      onClick={() => handleSportTabClick(id)}
+                      className="relative isolate shrink-0 px-3 py-1.5 text-xs font-bold rounded-[6px] cursor-pointer border border-[var(--pc-hairline)] bg-[var(--pc-hairline-soft)] text-[var(--pc-body)] hover:text-[var(--pc-ink)] transition-colors duration-150"
+                      aria-pressed={isActive}
+                    >
+                      {isActive && (
+                        <motion.span
+                          layoutId="home-sport-filter-active-pill-mobile"
+                          className="absolute inset-0 rounded-[6px] bg-[var(--pc-tennis)] shadow-sm"
+                          transition={pillTransition}
+                        />
+                      )}
+                      <span className="relative z-10">{s.name}</span>
+                    </button>
+                  );
+                });
+              })()}
             </div>
           )}
         </div>
