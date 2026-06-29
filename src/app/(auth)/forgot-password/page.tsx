@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { authService } from '@/lib/auth'
 
 export default function ForgotPasswordPage() {
   const [step, setStep] = useState<'email' | 'otp'>('email')
@@ -9,18 +10,52 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const [newPassword, setNewPassword] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Gọi API gửi OTP
-    console.log('Send OTP to:', email)
-    setStep('otp')
+    setIsLoading(true)
+    setError('')
+    setMessage('')
+    try {
+      const response = await authService.forgotPassword({ email: email.trim() })
+      setMessage(response.message || 'Đã gửi mã OTP.')
+      setStep('otp')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Không thể gửi OTP.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Gọi API reset password
-    console.log('Reset password:', { email, otp: otp.join(''), newPassword })
+    setIsLoading(true)
+    setError('')
+    setMessage('')
+    try {
+      const response = await authService.resetPassword({ email: email.trim(), otp: otp.join(''), newPassword })
+      setMessage(response.message || 'Đặt lại mật khẩu thành công.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Không thể đặt lại mật khẩu.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleResend = async () => {
+    setIsLoading(true)
+    setError('')
+    try {
+      const response = await authService.forgotPassword({ email: email.trim() })
+      setMessage(response.message || 'Đã gửi lại mã OTP.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Không thể gửi lại OTP.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleOtpChange = (index: number, value: string) => {
@@ -60,6 +95,8 @@ export default function ForgotPasswordPage() {
           </p>
 
           <form onSubmit={handleEmailSubmit} className="grid gap-4">
+            {error && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{error}</div>}
+            {message && <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">{message}</div>}
             <div className="grid gap-2">
               <label htmlFor="email" className="font-medium text-sm">
                 Email
@@ -76,9 +113,10 @@ export default function ForgotPasswordPage() {
 
             <button
               type="submit"
+              disabled={isLoading}
               className="w-full min-h-12 bg-green-900 text-white font-medium rounded-md hover:bg-green-950 active:translate-y-px transition-all"
             >
-              Gửi mã xác thực
+              {isLoading ? 'Đang gửi...' : 'Gửi mã xác thực'}
             </button>
 
             <Link
@@ -101,6 +139,8 @@ export default function ForgotPasswordPage() {
           </p>
 
           <form onSubmit={handleOtpSubmit} className="grid gap-4">
+            {error && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{error}</div>}
+            {message && <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">{message}</div>}
             {/* OTP Grid */}
             <div className="grid grid-cols-6 gap-2">
               {otp.map((digit, index) => (
@@ -145,14 +185,16 @@ export default function ForgotPasswordPage() {
 
             <button
               type="submit"
+              disabled={isLoading}
               className="w-full min-h-12 bg-green-900 text-white font-medium rounded-md hover:bg-green-950 active:translate-y-px transition-all"
             >
-              Đặt lại mật khẩu
+              {isLoading ? 'Đang xử lý...' : 'Đặt lại mật khẩu'}
             </button>
 
             <button
               type="button"
-              onClick={() => console.log('Resend OTP')}
+              onClick={handleResend}
+              disabled={isLoading}
               className="text-sm font-medium text-green-800 hover:underline"
             >
               Gửi lại mã

@@ -2,22 +2,50 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { authService } from '@/lib/auth'
 
 export default function RegisterPage() {
+  const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [role, setRole] = useState<'player' | 'owner'>('player')
+  const [isLoading, setIsLoading] = useState(false)
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     phone: '',
     password: '',
+    businessName: '',
     agreeTerms: false,
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Kết nối API register từ BE
-    console.log('Register:', { ...formData, role })
+    setError('')
+    setMessage('')
+    if (role === 'owner' && !formData.businessName.trim()) {
+      setError('Chủ sân cần nhập tên doanh nghiệp.')
+      return
+    }
+    setIsLoading(true)
+    try {
+      const response = await authService.register({
+        fullName: formData.fullName.trim(),
+        email: formData.email.trim(),
+        phoneNumber: formData.phone.trim(),
+        password: formData.password,
+        role: role === 'owner' ? 'Owner' : 'Player',
+        businessName: role === 'owner' ? formData.businessName.trim() : null,
+      })
+      setMessage(response.message || 'Đăng ký thành công. Vui lòng xác minh email.')
+      router.push(`/verify-email?email=${encodeURIComponent(formData.email.trim())}`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Đăng ký thất bại.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -39,6 +67,8 @@ export default function RegisterPage() {
       <p className="text-gray-500 mb-7">
         Chọn mục đích chính. Có thể đổi sau.
       </p>
+      {error && <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{error}</div>}
+      {message && <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">{message}</div>}
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="grid gap-4">
@@ -81,6 +111,22 @@ export default function RegisterPage() {
             required
           />
         </div>
+
+        {role === 'owner' && (
+          <div className="grid gap-2">
+            <label htmlFor="businessName" className="font-medium text-sm">
+              Tên doanh nghiệp
+            </label>
+            <input
+              id="businessName"
+              type="text"
+              value={formData.businessName}
+              onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
+              className="w-full min-h-[42px] border border-gray-200 rounded-md bg-white px-3 py-2 outline-none hover:border-gray-300 focus:border-green-800 focus:ring-[3px] focus:ring-green-800/10 transition-colors"
+              required={role === 'owner'}
+            />
+          </div>
+        )}
 
         <div className="grid gap-2">
           <label htmlFor="email" className="font-medium text-sm">
@@ -153,9 +199,10 @@ export default function RegisterPage() {
 
         <button
           type="submit"
-          className="w-full min-h-12 bg-green-900 text-white font-medium rounded-md hover:bg-green-950 active:translate-y-px transition-all"
+          disabled={isLoading}
+          className="w-full min-h-12 bg-green-900 text-white font-medium rounded-md hover:bg-green-950 active:translate-y-px transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Tạo tài khoản
+          {isLoading ? 'Đang tạo...' : 'Tạo tài khoản'}
         </button>
       </form>
 

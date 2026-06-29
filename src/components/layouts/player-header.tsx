@@ -7,12 +7,14 @@ import { Search, Bell, User, Settings, LogOut, LayoutDashboard } from "lucide-re
 import * as Popover from "@radix-ui/react-popover";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import * as Tooltip from "@radix-ui/react-tooltip";
+import { useAuth } from "@/contexts/auth-context";
 
 export function PlayerHeader() {
   const pathname = usePathname();
+  const { user, logout } = useAuth();
 
   const navLinks = [
-    { name: "Tìm sân", href: "/courts" },
+    { name: "Tìm sân", href: "/venues" },
     { name: "Tìm trận", href: "/matches" },
     { name: "Booking", href: "/bookings" },
   ];
@@ -174,16 +176,16 @@ export function PlayerHeader() {
                 >
                   <div className="px-3 py-2.5 border-b border-[var(--pc-hairline)]">
                     <p className="text-xs font-medium text-[var(--pc-mute)] font-mono">Tài khoản</p>
-                    <p className="text-sm font-semibold text-[var(--pc-ink)] truncate">Nguyễn Văn A</p>
+                    <p className="text-sm font-semibold text-[var(--pc-ink)] truncate">{user?.fullName || user?.email || "Khách"}</p>
                   </div>
                   <div className="py-1">
                     <DropdownMenu.Item asChild>
-                      <Link 
-                        href="/owner"
+                      <Link
+                        href={user?.role === "Admin" ? "/admin/kyc" : "/owner/dashboard"}
                         className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-[var(--pc-ink)] hover:bg-[var(--pc-hairline-soft)] transition-colors outline-hidden cursor-pointer"
                       >
                         <LayoutDashboard className="h-4 w-4 text-[var(--pc-mute)]" />
-                        <span>Quản lý sân (Owner)</span>
+                        <span>{user?.role === "Admin" ? "Admin" : "Quản lý sân"}</span>
                       </Link>
                     </DropdownMenu.Item>
                     <DropdownMenu.Item asChild>
@@ -209,6 +211,7 @@ export function PlayerHeader() {
                     <DropdownMenu.Item asChild>
                       <button
                         type="button"
+                        onClick={logout}
                         className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-[var(--pc-error)] hover:bg-[var(--pc-error-deep)]/5 transition-colors outline-hidden cursor-pointer"
                       >
                         <LogOut className="h-4 w-4" />

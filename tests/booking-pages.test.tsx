@@ -10,18 +10,10 @@ describe('booking pages', () => {
     vi.restoreAllMocks();
   });
 
-  it('disables the payment action after checkout submission', async () => {
-    const user = userEvent.setup();
+  it('shows checkout as unsupported while Booking/Payment APIs are missing', () => {
     render(<CheckoutPage />);
-
-    await user.type(screen.getByLabelText('Họ và tên'), 'Nguyễn An');
-    await user.type(screen.getByLabelText('Số điện thoại'), '0901234567');
-    await user.click(screen.getByRole('checkbox'));
-    const submitButton = screen.getByRole('button', { name: /thanh toán/i });
-    await user.click(submitButton);
-
-    expect(submitButton).toBeDisabled();
-    expect(screen.getByText(/đang xử lý/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /booking chưa có api/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /thanh toán/i })).not.toBeInTheDocument();
   });
 
   it('copies the booking code and asks for cancellation confirmation', async () => {

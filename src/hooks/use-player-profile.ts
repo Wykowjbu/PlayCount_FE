@@ -1,125 +1,137 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { authService } from '@/lib/auth';
-import type {
-  Player,
-  UpdatePlayerInput,
-  BookingsResponse,
-  MatchesResponse,
-  PlayerStats,
-} from '@/types/player';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { api, type UserProfile } from '@/lib/api/client';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+export type Player = {
+  id: string | number;
+  name: string;
+  email: string;
+  phone: string;
+  avatar: string | null;
+  createdAt: string;
+};
 
-function getAuthHeaders() {
-  const token = authService.getToken();
+export interface UpdatePlayerInput {
+  name?: string;
+  phone?: string;
+}
+
+export interface PlayerBooking {
+  id: string;
+  venueName: string;
+  courtName: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  totalPrice: number;
+}
+
+export interface BookingsResponse {
+  bookings: PlayerBooking[];
+  total: number;
+  page: number;
+  totalPages: number;
+}
+
+export interface PlayerMatch {
+  id: string;
+  title: string;
+  venueName: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  currentPlayers: number;
+  maxPlayers: number;
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  isCreator: boolean;
+}
+
+export interface MatchesResponse {
+  matches: PlayerMatch[];
+  total: number;
+  page: number;
+  totalPages: number;
+}
+
+export interface PlayerStats {
+  totalMatches: number;
+  totalHoursPlayed: number;
+  favoriteVenue: { id: string; name: string; bookingCount: number } | null;
+  totalBookings: number;
+  completedBookings: number;
+}
+
+function mapProfile(profile: UserProfile): Player {
   return {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    id: profile.id,
+    name: profile.fullName ?? '',
+    email: profile.email ?? '',
+    phone: profile.phoneNumber ?? '',
+    avatar: profile.avatarUrl ?? null,
+    createdAt: '',
   };
 }
 
-// Get player profile
 export function usePlayerProfile() {
   return useQuery<Player>({
-    queryKey: ['player', 'me'],
+    queryKey: ['users', 'me'],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE}/api/players/me`, {
-        headers: getAuthHeaders(),
-      });
-      if (!res.ok) throw new Error('Failed to fetch profile');
-      return res.json();
+      const response = await api.users.me();
+      if (!response.data) throw new Error(response.message || 'Không thể tải hồ sơ.');
+      return mapProfile(response.data);
     },
   });
 }
 
-// Update player profile
 export function useUpdatePlayer() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (input: UpdatePlayerInput) => {
-      const res = await fetch(`${API_BASE}/api/players/me`, {
-        method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(input),
-      });
-      if (!res.ok) throw new Error('Failed to update profile');
-      return res.json();
+      const response = await api.users.updateMe({ fullName: input.name });
+      if (!response.data) throw new Error(response.message || 'Không thể cập nhật hồ sơ.');
+      return mapProfile(response.data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['player', 'me'] });
+      queryClient.invalidateQueries({ queryKey: ['users', 'me'] });
     },
   });
 }
 
-// Upload avatar
 export function useUploadAvatar() {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (file: File) => {
-      const formData = new FormData();
-      formData.append('file', file);
-      const token = authService.getToken();
-      const res = await fetch(`${API_BASE}/api/players/me/avatar`, {
-        method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        body: formData,
-      });
-      if (!res.ok) throw new Error('Failed to upload avatar');
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['player', 'me'] });
+      void file;
+      throw new Error('Backend hiện chưa có API upload avatar. Hãy nhập avatar URL qua hồ sơ khi BE hỗ trợ.');
     },
   });
 }
 
-// Get booking history
-export function usePlayerBookings(page: number, status: string) {
+export function usePlayerBookings(page?: number, status?: string) {
+  void page;
+  void status;
   return useQuery<BookingsResponse>({
-    queryKey: ['player', 'bookings', { page, status }],
-    queryFn: async () => {
-      const params = new URLSearchParams({
-        page: String(page),
-        limit: '10',
-        status,
-      });
-      const res = await fetch(`${API_BASE}/api/players/me/bookings?${params}`, {
-        headers: getAuthHeaders(),
-      });
-      if (!res.ok) throw new Error('Failed to fetch bookings');
-      return res.json();
-    },
+    queryKey: ['unsupported', 'bookings'],
+    queryFn: async () => ({ bookings: [], total: 0, page: 1, totalPages: 0 }),
   });
 }
 
-// Get match history
-export function usePlayerMatches(page: number) {
+export function usePlayerMatches(page?: number) {
+  void page;
   return useQuery<MatchesResponse>({
-    queryKey: ['player', 'matches', { page }],
-    queryFn: async () => {
-      const params = new URLSearchParams({
-        page: String(page),
-        limit: '10',
-      });
-      const res = await fetch(`${API_BASE}/api/players/me/matches?${params}`, {
-        headers: getAuthHeaders(),
-      });
-      if (!res.ok) throw new Error('Failed to fetch matches');
-      return res.json();
-    },
+    queryKey: ['unsupported', 'matches'],
+    queryFn: async () => ({ matches: [], total: 0, page: 1, totalPages: 0 }),
   });
 }
 
-// Get player stats
 export function usePlayerStats() {
   return useQuery<PlayerStats>({
-    queryKey: ['player', 'stats'],
-    queryFn: async () => {
-      const res = await fetch(`${API_BASE}/api/players/me/stats`, {
-        headers: getAuthHeaders(),
-      });
-      if (!res.ok) throw new Error('Failed to fetch stats');
-      return res.json();
-    },
+    queryKey: ['unsupported', 'stats'],
+    queryFn: async () => ({
+      totalMatches: 0,
+      totalHoursPlayed: 0,
+      favoriteVenue: null,
+      totalBookings: 0,
+      completedBookings: 0,
+    }),
   });
 }

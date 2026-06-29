@@ -1,7 +1,7 @@
 'use client';
 
 import { usePlayerStats } from '@/hooks/use-player-profile';
-import { Loader2, Trophy, Clock, MapPin, Calendar, CheckCircle } from 'lucide-react';
+import { Loader2, Trophy, Clock, MapPin, Calendar } from 'lucide-react';
 import Link from 'next/link';
 
 export function StatsTab() {

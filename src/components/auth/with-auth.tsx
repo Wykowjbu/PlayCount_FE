@@ -22,7 +22,7 @@ export function withAuth<P extends object>(
       if (allowedRoles) {
         const user = authService.getCurrentUser();
         if (!user || !allowedRoles.includes(user.role)) {
-          router.push('/login');
+          router.push('/403');
         }
       }
     }, [router]);

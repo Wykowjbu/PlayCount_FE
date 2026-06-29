@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { PlayerHeader } from "./player-header";
 import { PlayerMobileNav } from "./player-mobile-nav";
 import { OwnerSidebar } from "./owner-sidebar";
+import { authService } from "@/lib/auth";
 
 interface LayoutWrapperProps {
   children: React.ReactNode;
@@ -12,6 +13,22 @@ interface LayoutWrapperProps {
 
 export function LayoutWrapper({ children }: LayoutWrapperProps) {
   const pathname = usePathname() || "";
+  const router = useRouter();
+
+  React.useEffect(() => {
+    const user = authService.getCurrentUser();
+    const protectedRoute =
+      pathname.startsWith("/owner") ||
+      pathname.startsWith("/admin") ||
+      pathname.startsWith("/profile");
+    if (!protectedRoute) return;
+    if (!authService.isAuthenticated()) {
+      router.replace(`/login?next=${encodeURIComponent(pathname)}`);
+      return;
+    }
+    if (pathname.startsWith("/owner") && user?.role !== "CourtOwner") router.push("/403");
+    if (pathname.startsWith("/admin") && user?.role !== "Admin") router.push("/403");
+  }, [pathname, router]);
   
   // Check if current route is owner or admin panel
   const isProLayout = pathname.startsWith("/owner") || pathname.startsWith("/admin");

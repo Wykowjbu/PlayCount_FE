@@ -5,19 +5,19 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   accessToken: string;
-  tokenType: string;
-  expiresAt: string;
-  user: LoginUser;
+  tokenType?: string;
+  expiresAt?: string;
+  user?: LoginUser | null;
 }
 
 export interface LoginUser {
-  id: number;
-  fullName: string;
-  email: string;
-  phoneNumber: string;
+  id: number | string;
+  fullName?: string | null;
+  email?: string | null;
+  phoneNumber?: string | null;
   role: string;
-  status: string;
-  isEmailVerified: boolean;
+  status?: string | null;
+  isEmailVerified?: boolean;
 }
 
 export interface ApiResponse<T> {

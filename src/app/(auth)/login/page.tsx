@@ -13,7 +13,6 @@ export default function LoginPage() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    remember: false,
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,18 +30,18 @@ export default function LoginPage() {
         const user = response.data.user
 
         // Redirect dựa trên role
-        if (user.role === 'Owner') {
+        if (user?.role === 'CourtOwner' || user?.role === 'Owner') {
           router.push('/owner/dashboard')
-        } else if (user.role === 'Admin') {
+        } else if (user?.role === 'Admin') {
           router.push('/admin/kyc')
         } else {
-          router.push('/matches')
+          router.push('/venues')
         }
       } else {
         setError(response.message || 'Đăng nhập thất bại')
       }
     } catch (err) {
-      setError('Không thể kết nối đến server. Vui lòng thử lại.')
+      setError(err instanceof Error ? err.message : 'Không thể kết nối đến server. Vui lòng thử lại.')
     } finally {
       setIsLoading(false)
     }
@@ -124,16 +123,6 @@ export default function LoginPage() {
             </button>
           </div>
         </div>
-
-        <label className="flex items-center gap-2.5 text-sm cursor-pointer">
-          <input
-            type="checkbox"
-            checked={formData.remember}
-            onChange={(e) => setFormData({ ...formData, remember: e.target.checked })}
-            className="w-[18px] h-[18px] accent-green-800"
-          />
-          Ghi nhớ đăng nhập
-        </label>
 
         <button
           type="submit"

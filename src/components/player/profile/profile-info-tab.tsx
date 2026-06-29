@@ -41,13 +41,12 @@ export function ProfileInfoTab() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file
     if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
-      alert('Chỉ chấp nhận file PNG, JPEG, hoặc WebP');
+      setAvatarPreview(null);
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      alert('File không được vượt quá 5MB');
+      setAvatarPreview(null);
       return;
     }
 
@@ -61,20 +60,17 @@ export function ProfileInfoTab() {
     // Upload
     try {
       await uploadAvatar.mutateAsync(file);
-      alert('Cập nhật ảnh đại diện thành công');
-    } catch (error) {
-      alert('Không thể tải ảnh lên. Vui lòng thử lại');
-      setAvatarPreview(null);
+    } catch {
+      // Upload not supported yet — keep local preview
     }
   };
 
   const onSubmit = async (data: ProfileFormData) => {
     try {
       await updatePlayer.mutateAsync(data);
-      alert('Cập nhật thành công');
       reset(data);
-    } catch (error) {
-      alert('Không thể cập nhật. Vui lòng thử lại');
+    } catch {
+      return;
     }
   };
 
