@@ -131,7 +131,7 @@ function VenuesSearchContent() {
         ) : venues.length > 0 ? (
           <div className="flex flex-col gap-4">
             {venues.map((venue) => (
-              <VenueCard key={venue.id} name={venue.name} image={getVenueImage(venue)} sport={getVenueSportName(venue)} rating={venue.rating ?? 0} nearestSlot={venue.openTime && venue.closeTime ? `${venue.openTime} - ${venue.closeTime}` : "Xem chi tiết"} layout="wide" onScheduleClick={() => router.push(`/venues/${venue.id}`)} />
+              <VenueCard key={venue.id} name={venue.name} image={getVenueImage(venue)} sport={getVenueSportName(venue)} rating={venue.rating ?? 0} openingHours={venue.openTime && venue.closeTime ? `${venue.openTime} - ${venue.closeTime}` : "Chưa cập nhật giờ hoạt động"} layout="wide" onScheduleClick={() => router.push(`/venues/${venue.id}`)} />
             ))}
           </div>
         ) : (

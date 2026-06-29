@@ -420,12 +420,13 @@ function extractErrors(body: unknown) {
 
 export async function apiRequest<T>(
   path: string,
-  options: RequestInit & { auth?: boolean } = {},
+  options: RequestInit & { auth?: boolean; signal?: AbortSignal } = {},
 ): Promise<T> {
-  const { headers, body, ...init } = options;
+  const { headers, body, signal, ...init } = options;
   const token = getToken();
   const response = await fetch(`${API_BASE_URL}${normalizePath(path)}`, {
     ...init,
+    signal,
     headers: {
       ...(body instanceof FormData ? {} : { "Content-Type": "application/json" }),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -559,7 +560,8 @@ export const api = {
     delete: (id: number) => apiRequest<ApiResponse<unknown>>(`/api/Amenities/${id}`, { method: "DELETE" }),
   },
   venues: {
-    list: (filters: VenueFilters) => apiRequest<PagedResponse<Venue>>(`/api/Venues${toQuery(filters)}`),
+    list: (filters: VenueFilters, signal?: AbortSignal) =>
+      apiRequest<PagedResponse<Venue>>(`/api/Venues${toQuery(filters)}`, { signal }),
     detail: (id: string | number) => apiRequest<ApiResponse<Venue>>(`/api/Venues/${id}`),
     my: () => apiRequest<ApiResponse<Venue[]>>("/api/Venues/my"),
     myDetail: (id: string | number) => apiRequest<ApiResponse<Venue>>(`/api/Venues/my/${id}`),
@@ -703,7 +705,8 @@ export const api = {
   },
 };
 
-export const fetchVenues = async (filters: VenueFilters = {}) => api.venues.list(filters);
+export const fetchVenues = async (filters: VenueFilters = {}, signal?: AbortSignal) =>
+  api.venues.list(filters, signal);
 export const fetchVenueById = async (id: string | number) => unwrap(await api.venues.detail(id));
 
 export function getVenueImage(venue: Venue) {

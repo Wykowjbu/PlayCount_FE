@@ -7,6 +7,18 @@ import { PlayerMobileNav } from "./player-mobile-nav";
 import { OwnerSidebar } from "./owner-sidebar";
 import { authService } from "@/lib/auth";
 
+const AUTH_ROUTES = [
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/verify-email",
+  "/reset-password",
+];
+
+function isAuthRoute(pathname: string) {
+  return AUTH_ROUTES.some((route) => pathname.startsWith(route));
+}
+
 interface LayoutWrapperProps {
   children: React.ReactNode;
 }
@@ -41,7 +53,16 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
     // /profile, /bookings, /matches: ai đăng nhập cũng được (Owner, Admin, Player)
     // Chỉ chặn Guest — đã xử lý ở dòng 35-38
   }, [pathname, router]);
-  
+
+  // Auth routes: clean shell, no nav components
+  if (isAuthRoute(pathname)) {
+    return (
+      <main className="h-dvh min-h-0 overflow-hidden">
+        {children}
+      </main>
+    );
+  }
+
   // Check if current route is owner or admin panel
   const isProLayout = pathname.startsWith("/owner") || pathname.startsWith("/admin");
 
@@ -50,7 +71,7 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
       <div className="flex h-screen w-screen overflow-hidden bg-[var(--pc-canvas)]">
         {/* Pro Layout: Sidebar on Desktop */}
         <OwnerSidebar />
-        
+
         {/* Main Content Area */}
         <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
           {children}
@@ -64,12 +85,12 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
     <div className="flex flex-col min-h-screen bg-[var(--pc-canvas)] text-[var(--pc-body)]">
       {/* Top Header */}
       <PlayerHeader />
-      
+
       {/* Main Content Area - adding padding bottom on mobile for navigation bar height */}
       <main className="flex-1 pb-16 md:pb-0">
         {children}
       </main>
-      
+
       {/* Bottom Navigation for Mobile */}
       <PlayerMobileNav />
     </div>

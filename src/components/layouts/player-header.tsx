@@ -13,11 +13,16 @@ export function PlayerHeader() {
   const pathname = usePathname();
   const { user, isLoading, logout } = useAuth();
 
-  const navLinks = [
-    { name: "Tìm sân", href: "/venues" },
-    { name: "Tìm trận", href: "/matches" },
-    { name: "Booking", href: "/profile" },
-  ];
+  const navLinks = user
+    ? [
+        { name: "Tìm sân", href: "/venues" },
+        { name: "Tìm trận", href: "/matches" },
+        { name: "Lịch đặt", href: "/profile" },
+      ]
+    : [
+        { name: "Tìm sân", href: "/venues" },
+        { name: "Tìm trận", href: "/matches" },
+      ];
 
   const dashboardHref =
     user?.role === "Admin" ? "/admin/kyc" : user?.role === "CourtOwner" ? "/owner/dashboard" : null;
@@ -34,7 +39,7 @@ export function PlayerHeader() {
     <Tooltip.Provider>
       <header data-testid="player-header" className="sticky top-0 z-50 h-16 w-full border-b border-[var(--pc-hairline)] bg-[var(--pc-canvas)]/92 backdrop-blur-md transition-colors duration-200">
         <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          
+
           {/* Logo */}
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-1.5 font-sans text-xl font-semibold tracking-tight text-[var(--pc-ink)]">
@@ -66,12 +71,12 @@ export function PlayerHeader() {
 
           {/* Action Buttons */}
           <div className="flex items-center gap-4">
-            
+
             {/* Search Button */}
             <Tooltip.Root>
               <Tooltip.Trigger asChild>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="rounded-full p-2 text-[var(--pc-mute)] hover:bg-[var(--pc-hairline-soft)] hover:text-[var(--pc-ink)] transition-colors cursor-pointer"
                   aria-label="Tìm kiếm"
                 >
@@ -91,48 +96,50 @@ export function PlayerHeader() {
               </Tooltip.Portal>
             </Tooltip.Root>
 
-            {/* Notifications Popover */}
-            <Popover.Root>
-              <Tooltip.Root>
-                <Tooltip.Trigger asChild>
-                  <Popover.Trigger asChild>
-                    <button
-                      type="button"
-                      className="relative rounded-full p-2 text-[var(--pc-mute)] hover:bg-[var(--pc-hairline-soft)] hover:text-[var(--pc-ink)] transition-colors cursor-pointer"
-                      aria-label="Thông báo"
+            {/* Notifications Popover — only for authenticated users */}
+            {user && (
+              <Popover.Root>
+                <Tooltip.Root>
+                  <Tooltip.Trigger asChild>
+                    <Popover.Trigger asChild>
+                      <button
+                        type="button"
+                        className="relative rounded-full p-2 text-[var(--pc-mute)] hover:bg-[var(--pc-hairline-soft)] hover:text-[var(--pc-ink)] transition-colors cursor-pointer"
+                        aria-label="Thông báo"
+                      >
+                        <Bell className="h-5 w-5" />
+                      </button>
+                    </Popover.Trigger>
+                  </Tooltip.Trigger>
+                  <Tooltip.Portal>
+                    <Tooltip.Content
+                      side="bottom"
+                      align="center"
+                      sideOffset={4}
+                      className="z-50 rounded-md bg-[var(--pc-ink)] px-2.5 py-1.5 text-xs font-mono text-[var(--pc-canvas)] shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)] animate-in fade-in zoom-in-95 duration-150"
                     >
-                      <Bell className="h-5 w-5" />
-                    </button>
-                  </Popover.Trigger>
-                </Tooltip.Trigger>
-                <Tooltip.Portal>
-                  <Tooltip.Content
-                    side="bottom"
-                    align="center"
-                    sideOffset={4}
-                    className="z-50 rounded-md bg-[var(--pc-ink)] px-2.5 py-1.5 text-xs font-mono text-[var(--pc-canvas)] shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)] animate-in fade-in zoom-in-95 duration-150"
-                  >
-                    Thông báo
-                    <Tooltip.Arrow className="fill-[var(--pc-ink)]" />
-                  </Tooltip.Content>
-                </Tooltip.Portal>
-              </Tooltip.Root>
+                      Thông báo
+                      <Tooltip.Arrow className="fill-[var(--pc-ink)]" />
+                    </Tooltip.Content>
+                  </Tooltip.Portal>
+                </Tooltip.Root>
 
-              <Popover.Portal>
-                <Popover.Content
-                  align="end"
-                  sideOffset={8}
-                  className="z-50 w-80 rounded-2xl border border-[var(--pc-hairline)] bg-[var(--pc-surface)] p-2 shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)] ring-1 ring-black/5 animate-in fade-in slide-in-from-top-2 duration-200 focus:outline-hidden"
-                >
-                  <div className="flex items-center justify-between border-b border-[var(--pc-hairline)] px-3 py-2">
-                    <span className="text-sm font-semibold text-[var(--pc-ink)]">Thông báo</span>
-                  </div>
-                  <div className="py-6 text-center text-xs text-[var(--pc-mute)]">
-                    Backend chưa có Notification API. Không hiển thị badge.
-                  </div>
-                </Popover.Content>
-              </Popover.Portal>
-            </Popover.Root>
+                <Popover.Portal>
+                  <Popover.Content
+                    align="end"
+                    sideOffset={8}
+                    className="z-50 w-80 rounded-2xl border border-[var(--pc-hairline)] bg-[var(--pc-surface)] p-2 shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)] ring-1 ring-black/5 animate-in fade-in slide-in-from-top-2 duration-200 focus:outline-hidden"
+                  >
+                    <div className="flex items-center justify-between border-b border-[var(--pc-hairline)] px-3 py-2">
+                      <span className="text-sm font-semibold text-[var(--pc-ink)]">Thông báo</span>
+                    </div>
+                    <div className="py-6 text-center text-xs text-[var(--pc-mute)]">
+                      Chưa có thông báo.
+                    </div>
+                  </Popover.Content>
+                </Popover.Portal>
+              </Popover.Root>
+            )}
 
             {isLoading ? (
               <div
