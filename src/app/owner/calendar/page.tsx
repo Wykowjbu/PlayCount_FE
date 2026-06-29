@@ -27,6 +27,7 @@ export default function OwnerCalendarPage() {
   const [status, setStatus] = useState<"" | BookingStatusCode>("");
   const [selectedBooking, setSelectedBooking] = useState<BookingEvent | null>(null);
   const [reason, setReason] = useState("");
+  const [mutationError, setMutationError] = useState("");
 
   const venuesQuery = useQuery({
     queryKey: ["venues", "my"],
@@ -68,11 +69,24 @@ export default function OwnerCalendarPage() {
     queryClient.invalidateQueries({ queryKey: ["venues", "stats"] });
     setSelectedBooking(null);
     setReason("");
+    setMutationError("");
   };
 
-  const confirmMutation = useMutation({ mutationFn: (id: string) => api.bookings.confirm(id, reason), onSuccess: invalidateBookings });
-  const rejectMutation = useMutation({ mutationFn: (id: string) => api.bookings.reject(id, reason), onSuccess: invalidateBookings });
-  const completeMutation = useMutation({ mutationFn: (id: string) => api.bookings.complete(id, reason), onSuccess: invalidateBookings });
+  const confirmMutation = useMutation({
+    mutationFn: (id: string) => api.bookings.confirm(id, reason),
+    onSuccess: invalidateBookings,
+    onError: (err) => setMutationError(err instanceof Error ? err.message : "Xác nhận booking thất bại."),
+  });
+  const rejectMutation = useMutation({
+    mutationFn: (id: string) => api.bookings.reject(id, reason),
+    onSuccess: invalidateBookings,
+    onError: (err) => setMutationError(err instanceof Error ? err.message : "Từ chối booking thất bại."),
+  });
+  const completeMutation = useMutation({
+    mutationFn: (id: string) => api.bookings.complete(id, reason),
+    onSuccess: invalidateBookings,
+    onError: (err) => setMutationError(err instanceof Error ? err.message : "Hoàn thành booking thất bại."),
+  });
 
   return (
     <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-8">
@@ -115,6 +129,7 @@ export default function OwnerCalendarPage() {
       {effectiveVenueId && courts.length === 0 && !courtsQuery.isLoading && <p className="rounded-[8px] border border-[var(--pc-hairline)] bg-white p-6 text-sm text-[var(--pc-mute)]">Venue chưa có court.</p>}
       {courts.length > 0 && <ResourceCalendar courts={courts} bookings={events} selectedDate={new Date(selectedDate)} onEventClick={setSelectedBooking} />}
 
+      {mutationError && <div className="rounded-[8px] border border-red-200 bg-red-50 p-3 text-sm text-red-800">{mutationError}</div>}
       {selectedBooking && (
         <div role="dialog" aria-modal="true" aria-label="Cập nhật booking" className="fixed inset-0 z-50 grid place-items-center bg-black/35 p-4">
           <div className="w-full max-w-md rounded-[8px] bg-white p-6">

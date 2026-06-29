@@ -38,7 +38,8 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
     }
     if (pathname.startsWith("/owner") && user?.role !== "CourtOwner") router.push("/403");
     if (pathname.startsWith("/admin") && user?.role !== "Admin") router.push("/403");
-    if (playerRoute && user?.role !== "Player") router.push("/403");
+    // /profile, /bookings, /matches: ai đăng nhập cũng được (Owner, Admin, Player)
+    // Chỉ chặn Guest — đã xử lý ở dòng 35-38
   }, [pathname, router]);
   
   // Check if current route is owner or admin panel

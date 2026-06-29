@@ -96,7 +96,7 @@ export default function VenueStaffPage({ params }: StaffPageProps) {
               <div key={item.id} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm">
                 <div>
                   <p className="font-semibold text-[var(--pc-ink)]">{item.fullName}</p>
-                  <p className="text-[var(--pc-mute)]">{item.email} · {item.role} · {item.isActive ? "Active" : "Inactive"}</p>
+                  <p className="text-[var(--pc-mute)]">{item.email} · {roleLabels[item.role as unknown as VenueStaffRole] ?? item.role} · {item.isActive ? "Active" : "Inactive"}</p>
                 </div>
                 <Button
                   type="button"

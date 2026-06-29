@@ -25,6 +25,15 @@ function VenuesSearchContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Sync state from URL when it changes (e.g. browser Back/Forward)
+  useEffect(() => {
+    setKeyword(searchParams.get("Keyword") ?? "");
+    setSportId(searchParams.get("SportId") ?? "");
+    setIsOpenNow(searchParams.get("IsOpenNow") ?? "");
+    setPageIndex(Number(searchParams.get("PageIndex") ?? "1") || 1);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
   useEffect(() => {
     api.sports.list(true).then((response) => setSports(response.data ?? [])).catch(() => setSports([]));
   }, []);

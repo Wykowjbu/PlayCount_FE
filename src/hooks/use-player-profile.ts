@@ -137,13 +137,17 @@ export function usePlayerMatches(page?: number) {
   return useQuery<MatchesResponse>({
     queryKey: ['matches', 'me-ish', page ?? 1],
     queryFn: async () => {
-      const response = await api.matches.search({ PageIndex: page ?? 1, PageSize: 50, IncludeFull: true });
-      const mine = (response.data ?? []).filter((match) => match.isHost || match.isParticipant);
+      const response = await api.matches.search({ PageIndex: 1, PageSize: 200, IncludeFull: true });
+      const allMine = (response.data ?? []).filter((match) => match.isHost || match.isParticipant);
+      const pageIndex = page ?? 1;
+      const pageSize = 10;
+      const start = (pageIndex - 1) * pageSize;
+      const paged = allMine.slice(start, start + pageSize);
       return {
-        matches: mine.map(mapMatch),
-        total: mine.length,
-        page: response.pageIndex,
-        totalPages: response.totalPages,
+        matches: paged.map(mapMatch),
+        total: allMine.length,
+        page: pageIndex,
+        totalPages: Math.ceil(allMine.length / pageSize) || 1,
       };
     },
   });

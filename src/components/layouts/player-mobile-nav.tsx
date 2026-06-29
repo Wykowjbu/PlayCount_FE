@@ -2,13 +2,14 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Home, MapPin, Trophy, User, CalendarPlus, Swords, X } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import * as Tooltip from "@radix-ui/react-tooltip";
 
 export function PlayerMobileNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
 
   const tabs = [
@@ -129,7 +130,7 @@ export function PlayerMobileNav() {
               {/* Option 1: Đặt sân nhanh */}
               <button
                 type="button"
-                onClick={() => setIsOpen(false)}
+                onClick={() => { setIsOpen(false); router.push("/venues"); }}
                 className="flex flex-col items-center justify-center gap-3 rounded-xl border border-[var(--pc-hairline)] bg-[var(--pc-canvas)] p-5 text-center transition-all hover:border-[var(--pc-green-200)] hover:bg-[var(--pc-green-50)]/30 group cursor-pointer"
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[var(--pc-green-100)] text-[var(--pc-green-800)] transition-transform group-hover:scale-110">
@@ -144,7 +145,7 @@ export function PlayerMobileNav() {
               {/* Option 2: Tạo trận đấu */}
               <button
                 type="button"
-                onClick={() => setIsOpen(false)}
+                onClick={() => { setIsOpen(false); router.push("/matches/create"); }}
                 className="flex flex-col items-center justify-center gap-3 rounded-xl border border-[var(--pc-hairline)] bg-[var(--pc-canvas)] p-5 text-center transition-all hover:border-[var(--pc-green-200)] hover:bg-[var(--pc-green-50)]/30 group cursor-pointer"
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[var(--pc-tennis-soft)] text-[var(--pc-ink)] transition-transform group-hover:scale-110">

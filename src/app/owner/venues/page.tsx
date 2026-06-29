@@ -412,7 +412,7 @@ export default function OwnerVenuesPage() {
                       <Input label="Effective to" type="datetime-local" value={pricingForm.effectiveTo} onChange={(e) => setPricingForm({ ...pricingForm, effectiveTo: e.target.value })} />
                       <Button type="submit">Thêm pricing rule</Button>
                     </form>
-                    <ul className="mt-4 divide-y divide-[var(--pc-hairline)] text-sm">{pricingRules.map((rule) => <li key={rule.id} className="flex justify-between py-2"><span>Ngày {rule.dayOfWeek} · {rule.startTime}-{rule.endTime} · {rule.pricePerHour}</span><button className="text-red-700" onClick={async () => { if (confirm("Xóa pricing rule?")) { await api.pricingRules.delete(rule.id); setPricingRules((await api.courts.pricingRules(activeCourtId)).data ?? []); } }}>Xóa</button></li>)}</ul>
+                    <ul className="mt-4 divide-y divide-[var(--pc-hairline)] text-sm">{pricingRules.map((rule) => <li key={rule.id} className="flex justify-between py-2"><span>Ngày {rule.dayOfWeek} · {rule.startTime}-{rule.endTime} · {rule.pricePerHour}</span><button className="text-red-700" onClick={async () => { if (confirm("Xóa pricing rule?")) { try { await api.pricingRules.delete(rule.id); setPricingRules((await api.courts.pricingRules(activeCourtId)).data ?? []); } catch (err) { setError(err instanceof Error ? err.message : "Không thể xóa pricing rule."); } } }}>Xóa</button></li>)}</ul>
                   </section>
 
                   <section className="rounded-[8px] border border-[var(--pc-hairline)] bg-white p-5">
@@ -423,7 +423,7 @@ export default function OwnerVenuesPage() {
                       <Input label="Reason" value={scheduleForm.reason} onChange={(e) => setScheduleForm({ ...scheduleForm, reason: e.target.value })} />
                       <Button type="submit">Thêm lịch khóa</Button>
                     </form>
-                    <ul className="mt-4 divide-y divide-[var(--pc-hairline)] text-sm">{schedules.map((item) => <li key={item.id} className="flex justify-between gap-3 py-2"><span>{new Date(item.startAt).toLocaleString("vi-VN")} - {new Date(item.endAt).toLocaleString("vi-VN")} · {item.reason}</span><button className="text-red-700" onClick={async () => { if (confirm("Xóa schedule?")) { await api.schedules.delete(item.id); setSchedules((await api.courts.schedules(activeCourtId)).data ?? []); } }}>Xóa</button></li>)}</ul>
+                    <ul className="mt-4 divide-y divide-[var(--pc-hairline)] text-sm">{schedules.map((item) => <li key={item.id} className="flex justify-between gap-3 py-2"><span>{new Date(item.startAt).toLocaleString("vi-VN")} - {new Date(item.endAt).toLocaleString("vi-VN")} · {item.reason}</span><button className="text-red-700" onClick={async () => { if (confirm("Xóa schedule?")) { try { await api.schedules.delete(item.id); setSchedules((await api.courts.schedules(activeCourtId)).data ?? []); } catch (err) { setError(err instanceof Error ? err.message : "Không thể xóa schedule."); } } }}>Xóa</button></li>)}</ul>
                   </section>
                 </div>
               )}

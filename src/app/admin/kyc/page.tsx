@@ -84,6 +84,7 @@ export default function AdminKycPage() {
       {target && (
         <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 grid place-items-center bg-black/30 p-4">
           <div className="w-full max-w-lg rounded-[8px] bg-white p-6">
+            {error && <div className="mb-4 rounded-[8px] border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</div>}
             <h2 className="text-lg font-bold text-[var(--pc-ink)]">Chi tiết chủ sân</h2>
             <dl className="mt-4 grid gap-2 text-sm">
               <div><dt className="font-semibold">Tên</dt><dd>{target.fullName || "--"}</dd></div>

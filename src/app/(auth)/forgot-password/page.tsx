@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { authService } from '@/lib/auth'
 
@@ -13,6 +13,7 @@ export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [countdown, setCountdown] = useState(0)
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -23,6 +24,7 @@ export default function ForgotPasswordPage() {
       const response = await authService.forgotPassword({ email: email.trim() })
       setMessage(response.message || 'Đã gửi mã OTP.')
       setStep('otp')
+      setCountdown(300) // 5 phút
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không thể gửi OTP.')
     } finally {
@@ -51,6 +53,7 @@ export default function ForgotPasswordPage() {
     try {
       const response = await authService.forgotPassword({ email: email.trim() })
       setMessage(response.message || 'Đã gửi lại mã OTP.')
+      setCountdown(300)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không thể gửi lại OTP.')
     } finally {
@@ -71,6 +74,13 @@ export default function ForgotPasswordPage() {
       nextInput?.focus()
     }
   }
+
+  // Countdown timer
+  useEffect(() => {
+    if (countdown <= 0) return;
+    const interval = setInterval(() => setCountdown((prev) => prev - 1), 1000);
+    return () => clearInterval(interval);
+  }, [countdown]);
 
   return (
     <div className="w-full max-w-[420px]">
@@ -135,7 +145,7 @@ export default function ForgotPasswordPage() {
           </div>
           <h1 className="text-3xl font-semibold leading-10 mb-2">Nhập mã OTP</h1>
           <p className="text-gray-500 mb-7">
-            Đã gửi mã tới <b>{email}</b>. Hết hạn sau 04:32.
+            Đã gửi mã tới <b>{email}</b>. Hết hạn sau {String(Math.floor(countdown / 60)).padStart(2, '0')}:{String(countdown % 60).padStart(2, '0')}.
           </p>
 
           <form onSubmit={handleOtpSubmit} className="grid gap-4">
@@ -194,10 +204,10 @@ export default function ForgotPasswordPage() {
             <button
               type="button"
               onClick={handleResend}
-              disabled={isLoading}
-              className="text-sm font-medium text-green-800 hover:underline"
+              disabled={isLoading || countdown > 0}
+              className="text-sm font-medium text-green-800 hover:underline disabled:text-gray-400 disabled:cursor-not-allowed"
             >
-              Gửi lại mã
+              {countdown > 0 ? `Gửi lại sau ${countdown}s` : 'Gửi lại mã'}
             </button>
           </form>
         </>

@@ -330,13 +330,13 @@ export default function VenueDetailPage({ params }: PageProps) {
 
         <aside className="h-fit rounded-[12px] border border-[var(--pc-hairline)] bg-white p-6">
           <p className="text-xs font-bold uppercase tracking-wider text-[var(--pc-mute)]">Trạng thái venue</p>
-          <p className="mt-1 text-lg font-bold text-[var(--pc-ink)]">{venue.status ?? "Approved"}</p>
+          <p className="mt-1 text-lg font-bold text-[var(--pc-ink)]">{venue.status != null ? ({ "0": "Pending", "1": "Approved", "2": "Rejected", "3": "Suspended" }[String(venue.status)] ?? String(venue.status)) : "Approved"}</p>
           <div className="mt-5 grid gap-3">
             <label className="grid gap-1 text-xs font-semibold text-[var(--pc-body)]">
               Sân con
               <select
                 value={activeCourtId == null ? "" : String(activeCourtId)}
-                onChange={(event) => setActiveCourtId(event.target.value)}
+                onChange={(event) => setActiveCourtId(Number(event.target.value))}
                 className="h-10 rounded-[6px] border border-[var(--pc-hairline)] bg-white px-3 text-sm"
               >
                 <option value="">Chọn sân</option>

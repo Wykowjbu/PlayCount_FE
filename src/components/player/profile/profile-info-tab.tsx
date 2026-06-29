@@ -1,11 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/playcourt/button';
 import { Input } from '@/components/playcourt/input';
 import { usePlayerProfile, useUpdatePlayer } from '@/hooks/use-player-profile';
-import { api } from '@/lib/api/client';
 import { Loader2 } from 'lucide-react';
 
 interface ProfileFormData {
@@ -17,9 +15,6 @@ interface ProfileFormData {
 export function ProfileInfoTab() {
   const { data: player, isLoading } = usePlayerProfile();
   const updatePlayer = useUpdatePlayer();
-  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '' });
-  const [passwordMessage, setPasswordMessage] = useState('');
-  const [passwordSaving, setPasswordSaving] = useState(false);
 
   const {
     register,
@@ -42,21 +37,6 @@ export function ProfileInfoTab() {
       reset(data);
     } catch {
       return;
-    }
-  };
-
-  const changePassword = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setPasswordSaving(true);
-    setPasswordMessage('');
-    try {
-      const response = await api.auth.changePassword(passwordForm);
-      setPasswordForm({ currentPassword: '', newPassword: '' });
-      setPasswordMessage(response.message || 'Đã đổi mật khẩu.');
-    } catch (err) {
-      setPasswordMessage(err instanceof Error ? err.message : 'Không thể đổi mật khẩu.');
-    } finally {
-      setPasswordSaving(false);
     }
   };
 
@@ -153,18 +133,6 @@ export function ProfileInfoTab() {
           )}
         </Button>
       </div>
-      </form>
-
-      <form onSubmit={changePassword} className="rounded-[8px] border border-[var(--pc-hairline)] bg-white p-5">
-        <h2 className="text-lg font-semibold text-[var(--pc-ink)]">Đổi mật khẩu</h2>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <Input required label="Mật khẩu hiện tại" type="password" value={passwordForm.currentPassword} onChange={(event) => setPasswordForm({ ...passwordForm, currentPassword: event.target.value })} />
-          <Input required label="Mật khẩu mới" type="password" minLength={6} value={passwordForm.newPassword} onChange={(event) => setPasswordForm({ ...passwordForm, newPassword: event.target.value })} />
-        </div>
-        <Button type="submit" className="mt-4" disabled={passwordSaving}>
-          {passwordSaving ? 'Đang đổi...' : 'Đổi mật khẩu'}
-        </Button>
-        {passwordMessage && <p className="mt-3 text-sm text-[var(--pc-body)]">{passwordMessage}</p>}
       </form>
     </div>
   );

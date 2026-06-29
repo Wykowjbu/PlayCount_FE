@@ -19,10 +19,15 @@ export default function AdminAmenitiesPage() {
   useEffect(load, []);
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (form.id) await api.amenities.update(form.id, { name: form.name.trim() });
-    else await api.amenities.create({ name: form.name.trim() });
-    setForm({ id: 0, name: "" });
-    load();
+    setError("");
+    try {
+      if (form.id) await api.amenities.update(form.id, { name: form.name.trim() });
+      else await api.amenities.create({ name: form.name.trim() });
+      setForm({ id: 0, name: "" });
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Không thể lưu amenity.");
+    }
   };
   return (
     <section className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-6 py-8">
@@ -36,7 +41,7 @@ export default function AdminAmenitiesPage() {
         {loading ? <p className="p-4">Đang tải...</p> : amenities.map((amenity) => (
           <div key={amenity.id} className="flex items-center justify-between border-t border-[var(--pc-hairline)] p-4 first:border-t-0">
             <span className="font-semibold">{amenity.name}</span>
-            <div className="flex gap-2"><Button variant="Secondary" type="button" onClick={() => setForm({ id: amenity.id, name: amenity.name })}>Sửa</Button><Button variant="Danger" type="button" onClick={async () => { if (confirm("Xóa tiện ích?")) { await api.amenities.delete(amenity.id); load(); } }}>Xóa</Button></div>
+            <div className="flex gap-2"><Button variant="Secondary" type="button" onClick={() => setForm({ id: amenity.id, name: amenity.name })}>Sửa</Button><Button variant="Danger" type="button" onClick={async () => { if (confirm("Xóa tiện ích?")) { try { await api.amenities.delete(amenity.id); load(); } catch (err) { setError(err instanceof Error ? err.message : "Không thể xóa amenity."); } } }}>Xóa</Button></div>
           </div>
         ))}
       </div>

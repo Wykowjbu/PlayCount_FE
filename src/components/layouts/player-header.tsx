@@ -16,7 +16,7 @@ export function PlayerHeader() {
   const navLinks = [
     { name: "Tìm sân", href: "/venues" },
     { name: "Tìm trận", href: "/matches" },
-    { name: "Booking", href: "/bookings" },
+    { name: "Booking", href: "/profile" },
   ];
 
   const dashboardHref =
