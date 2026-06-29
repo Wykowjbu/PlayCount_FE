@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { AnimatePresence, motion } from 'motion/react'
 import { authService } from '@/lib/auth'
 
 export default function RegisterPage() {
@@ -20,6 +21,16 @@ export default function RegisterPage() {
     businessName: '',
     agreeTerms: false,
   })
+
+  const handleRoleChange = useCallback((newRole: 'player' | 'owner') => {
+    setRole(newRole)
+    // Clear businessName-related error when switching away from owner
+    if (newRole === 'player') {
+      setError((prev) =>
+        prev === 'Chủ sân cần nhập tên doanh nghiệp.' ? '' : prev,
+      )
+    }
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -48,16 +59,25 @@ export default function RegisterPage() {
     }
   }
 
+  const tabInfo = [
+    { role: 'player' as const, label: 'Người chơi' },
+    { role: 'owner' as const, label: 'Chủ sân' },
+  ]
+
   return (
-    <div className="w-full max-w-[420px]">
-      {/* Brand mobile */}
-      <div className="flex items-center gap-3 mb-8">
+    <div className="self-start w-full max-w-[420px] register-form-compact">
+      {/* Brand mobile - visible only on mobile, hidden on desktop where left panel has brand */}
+      <Link
+        href="/"
+        aria-label="Về trang chủ"
+        className="lg:hidden flex items-center gap-3 mb-8"
+      >
         <div className="w-8 h-8 rounded-lg border border-gray-800 bg-gray-900 relative overflow-hidden">
           <div className="absolute w-3 h-3 left-[13px] top-1 bg-[#c7f227] rounded-full" />
           <div className="absolute w-[11px] h-[11px] left-1 top-3.5 bg-white rounded-full" />
         </div>
         <span className="text-lg font-semibold tracking-tight">PlayCourt</span>
-      </div>
+      </Link>
 
       {/* Header */}
       <div className="font-mono text-xs font-medium text-gray-600 mb-2.5">
@@ -72,30 +92,41 @@ export default function RegisterPage() {
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="grid gap-4">
-        {/* Role Toggle */}
-        <div className="grid grid-cols-2 gap-1 border border-gray-200 rounded-lg bg-gray-100 p-1">
-          <button
-            type="button"
-            onClick={() => setRole('player')}
-            className={`h-9 rounded-md font-medium transition-all ${
-              role === 'player'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'bg-transparent text-gray-700'
-            }`}
-          >
-            Người chơi
-          </button>
-          <button
-            type="button"
-            onClick={() => setRole('owner')}
-            className={`h-9 rounded-md font-medium transition-all ${
-              role === 'owner'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'bg-transparent text-gray-700'
-            }`}
-          >
-            Chủ sân
-          </button>
+        {/* Role Toggle - Animate UI style */}
+        <div
+          className="relative grid grid-cols-2 gap-1 border border-gray-200 rounded-lg bg-gray-100 p-1"
+          role="tablist"
+        >
+          {tabInfo.map(({ role: tabRole, label }) => (
+            <button
+              key={tabRole}
+              type="button"
+              role="tab"
+              aria-selected={role === tabRole}
+              aria-controls={tabRole === 'owner' ? 'business-name-panel' : undefined}
+              onClick={() => handleRoleChange(tabRole)}
+              className="relative h-9 rounded-md font-medium transition-all"
+            >
+              {role === tabRole && (
+                <motion.span
+                  layoutId="register-role-active-indicator"
+                  className="absolute inset-0 rounded-md bg-white shadow-sm"
+                  transition={{
+                    type: 'spring',
+                    stiffness: 400,
+                    damping: 32,
+                  }}
+                />
+              )}
+              <span
+                className={`relative z-10 transition-colors ${
+                  role === tabRole ? 'text-gray-900' : 'text-gray-700'
+                }`}
+              >
+                {label}
+              </span>
+            </button>
+          ))}
         </div>
 
         <div className="grid gap-2">
@@ -112,21 +143,37 @@ export default function RegisterPage() {
           />
         </div>
 
-        {role === 'owner' && (
-          <div className="grid gap-2">
-            <label htmlFor="businessName" className="font-medium text-sm">
-              Tên doanh nghiệp
-            </label>
-            <input
-              id="businessName"
-              type="text"
-              value={formData.businessName}
-              onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-              className="w-full min-h-[42px] border border-gray-200 rounded-md bg-white px-3 py-2 outline-none hover:border-gray-300 focus:border-green-800 focus:ring-[3px] focus:ring-green-800/10 transition-colors"
-              required={role === 'owner'}
-            />
-          </div>
-        )}
+        <AnimatePresence initial={false}>
+          {role === 'owner' && (
+            <motion.div
+              key="businessName"
+              initial={{ height: 0, opacity: 0, y: -6 }}
+              animate={{ height: 'auto', opacity: 1, y: 0 }}
+              exit={{ height: 0, opacity: 0, y: -6 }}
+              transition={{
+                height: { duration: 0.22, ease: [0.4, 0, 0.2, 1] },
+                opacity: { duration: 0.14 },
+                y: { duration: 0.18 },
+              }}
+              className="overflow-hidden"
+            >
+              <div className="grid gap-2" id="business-name-panel" role="tabpanel">
+                <label htmlFor="businessName" className="font-medium text-sm">
+                  Tên doanh nghiệp
+                </label>
+                <input
+                  id="businessName"
+                  type="text"
+                  value={formData.businessName}
+                  onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
+                  className="w-full min-h-[42px] border border-gray-200 rounded-md bg-white px-3 py-2 outline-none hover:border-gray-300 focus:border-green-800 focus:ring-[3px] focus:ring-green-800/10 transition-colors"
+                  required={role === 'owner'}
+                  disabled={role !== 'owner'}
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div className="grid gap-2">
           <label htmlFor="email" className="font-medium text-sm">
