@@ -1,23 +1,25 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/playcourt/button';
 import { Input } from '@/components/playcourt/input';
-import { usePlayerProfile, useUpdatePlayer, useUploadAvatar } from '@/hooks/use-player-profile';
-import { Upload, Loader2 } from 'lucide-react';
+import { usePlayerProfile, useUpdatePlayer } from '@/hooks/use-player-profile';
+import { api } from '@/lib/api/client';
+import { Loader2 } from 'lucide-react';
 
 interface ProfileFormData {
   name: string;
   phone: string;
+  avatarUrl: string;
 }
 
 export function ProfileInfoTab() {
   const { data: player, isLoading } = usePlayerProfile();
   const updatePlayer = useUpdatePlayer();
-  const uploadAvatar = useUploadAvatar();
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '' });
+  const [passwordMessage, setPasswordMessage] = useState('');
+  const [passwordSaving, setPasswordSaving] = useState(false);
 
   const {
     register,
@@ -29,48 +31,32 @@ export function ProfileInfoTab() {
       ? {
           name: player.name,
           phone: player.phone,
+          avatarUrl: player.avatar ?? '',
         }
       : undefined,
   });
 
-  const handleAvatarClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
-      setAvatarPreview(null);
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setAvatarPreview(null);
-      return;
-    }
-
-    // Preview
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setAvatarPreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-
-    // Upload
-    try {
-      await uploadAvatar.mutateAsync(file);
-    } catch {
-      // Upload not supported yet — keep local preview
-    }
-  };
-
   const onSubmit = async (data: ProfileFormData) => {
     try {
-      await updatePlayer.mutateAsync(data);
+      await updatePlayer.mutateAsync({ name: data.name, avatarUrl: data.avatarUrl.trim() || null });
       reset(data);
     } catch {
       return;
+    }
+  };
+
+  const changePassword = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setPasswordSaving(true);
+    setPasswordMessage('');
+    try {
+      const response = await api.auth.changePassword(passwordForm);
+      setPasswordForm({ currentPassword: '', newPassword: '' });
+      setPasswordMessage(response.message || 'Đã đổi mật khẩu.');
+    } catch (err) {
+      setPasswordMessage(err instanceof Error ? err.message : 'Không thể đổi mật khẩu.');
+    } finally {
+      setPasswordSaving(false);
     }
   };
 
@@ -93,45 +79,25 @@ export function ProfileInfoTab() {
       .slice(0, 2);
   };
 
-  const avatarUrl = avatarPreview || player.avatar;
+  const avatarUrl = player.avatar;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="mx-auto max-w-2xl space-y-8">
+    <div className="mx-auto max-w-2xl space-y-8">
       {/* Avatar */}
       <div className="flex flex-col items-center">
-        <div
-          className="group relative h-32 w-32 cursor-pointer overflow-hidden rounded-full"
-          onClick={handleAvatarClick}
-        >
+        <div className="relative h-32 w-32 overflow-hidden rounded-full">
           {avatarUrl ? (
             <img src={avatarUrl} alt={player.name} className="h-full w-full object-cover" />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 text-3xl font-semibold text-white">
+            <div className="flex h-full w-full items-center justify-center bg-[var(--pc-green-800)] text-3xl font-semibold text-white">
               {getInitials(player.name)}
             </div>
           )}
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-            {uploadAvatar.isPending ? (
-              <Loader2 className="h-6 w-6 animate-spin text-white" />
-            ) : (
-              <div className="text-center">
-                <Upload className="mx-auto h-6 w-6 text-white" />
-                <p className="mt-1 text-xs text-white">Upload ảnh</p>
-              </div>
-            )}
-          </div>
         </div>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/png,image/jpeg,image/webp"
-          className="hidden"
-          onChange={handleFileChange}
-        />
       </div>
 
       {/* Form */}
-      <div className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div>
           <label className="mb-2 block text-sm font-medium text-[var(--pc-ink)]">Tên</label>
           <Input
@@ -153,19 +119,14 @@ export function ProfileInfoTab() {
           <label className="mb-2 block text-sm font-medium text-[var(--pc-ink)]">
             Số điện thoại
           </label>
-          <Input
-            {...register('phone', {
-              required: 'Số điện thoại không được để trống',
-              pattern: {
-                value: /^(\+84|0)\d{9,10}$/,
-                message: 'Số điện thoại không hợp lệ',
-              },
-            })}
-            placeholder="+84 hoặc 0xxxxxxxxx"
-          />
-          {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>}
+          <Input {...register('phone')} disabled className="bg-gray-50" />
+          <p className="mt-1 text-xs text-[var(--pc-mute)]">Backend chưa hỗ trợ cập nhật phone trong profile DTO.</p>
         </div>
-      </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-[var(--pc-ink)]">Avatar URL</label>
+          <Input {...register('avatarUrl')} type="url" placeholder="https://..." />
+        </div>
 
       {/* Actions */}
       <div className="flex gap-3">
@@ -192,6 +153,19 @@ export function ProfileInfoTab() {
           )}
         </Button>
       </div>
-    </form>
+      </form>
+
+      <form onSubmit={changePassword} className="rounded-[8px] border border-[var(--pc-hairline)] bg-white p-5">
+        <h2 className="text-lg font-semibold text-[var(--pc-ink)]">Đổi mật khẩu</h2>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <Input required label="Mật khẩu hiện tại" type="password" value={passwordForm.currentPassword} onChange={(event) => setPasswordForm({ ...passwordForm, currentPassword: event.target.value })} />
+          <Input required label="Mật khẩu mới" type="password" minLength={6} value={passwordForm.newPassword} onChange={(event) => setPasswordForm({ ...passwordForm, newPassword: event.target.value })} />
+        </div>
+        <Button type="submit" className="mt-4" disabled={passwordSaving}>
+          {passwordSaving ? 'Đang đổi...' : 'Đổi mật khẩu'}
+        </Button>
+        {passwordMessage && <p className="mt-3 text-sm text-[var(--pc-body)]">{passwordMessage}</p>}
+      </form>
+    </div>
   );
 }

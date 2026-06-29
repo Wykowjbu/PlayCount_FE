@@ -3,6 +3,7 @@
 /* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/playcourt/button";
 import { Input } from "@/components/playcourt/input";
 import {
@@ -340,6 +341,18 @@ export default function OwnerVenuesPage() {
 
           {selectedVenue && (
             <>
+              <div className="rounded-[8px] border border-[var(--pc-hairline)] bg-white p-5">
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-lg font-bold text-[var(--pc-ink)]">Staff</h2>
+                    <p className="text-sm text-[var(--pc-mute)]">Quản lý staff bằng VenueStaff API.</p>
+                  </div>
+                  <Link className="rounded-[6px] bg-[var(--pc-green-800)] px-4 py-2 text-sm font-semibold text-white" href={`/owner/venues/${selectedVenue.id}/staff`}>
+                    Mở staff
+                  </Link>
+                </div>
+              </div>
+
               <div className="rounded-[8px] border border-[var(--pc-hairline)] bg-white p-5">
                 <h2 className="text-lg font-bold text-[var(--pc-ink)]">Ảnh venue</h2>
                 <div className="mt-3 grid gap-3 md:grid-cols-[1fr_auto]">

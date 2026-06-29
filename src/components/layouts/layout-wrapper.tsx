@@ -17,10 +17,20 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
 
   React.useEffect(() => {
     const user = authService.getCurrentUser();
-    const protectedRoute =
-      pathname.startsWith("/owner") ||
-      pathname.startsWith("/admin") ||
-      pathname.startsWith("/profile");
+    const guestRoute = pathname.startsWith("/login") || pathname.startsWith("/register");
+    const playerRoute =
+      pathname.startsWith("/profile") ||
+      pathname.startsWith("/bookings") ||
+      pathname.startsWith("/matches");
+    const protectedRoute = pathname.startsWith("/owner") || pathname.startsWith("/admin") || playerRoute;
+
+    if (guestRoute && authService.isAuthenticated()) {
+      if (user?.role === "Admin") router.replace("/admin/kyc");
+      else if (user?.role === "CourtOwner") router.replace("/owner/dashboard");
+      else router.replace("/profile");
+      return;
+    }
+
     if (!protectedRoute) return;
     if (!authService.isAuthenticated()) {
       router.replace(`/login?next=${encodeURIComponent(pathname)}`);
@@ -28,6 +38,7 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
     }
     if (pathname.startsWith("/owner") && user?.role !== "CourtOwner") router.push("/403");
     if (pathname.startsWith("/admin") && user?.role !== "Admin") router.push("/403");
+    if (playerRoute && user?.role !== "Player") router.push("/403");
   }, [pathname, router]);
   
   // Check if current route is owner or admin panel

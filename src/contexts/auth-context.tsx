@@ -1,9 +1,10 @@
-'use client';
+"use client";
 
-import { createContext, useContext, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { authService } from '@/lib/auth';
-import type { LoginUser } from '@/types/auth';
+import { createContext, useContext, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { authService } from "@/lib/auth";
+import { SESSION_CHANGED_EVENT } from "@/lib/api/client";
+import type { LoginUser } from "@/types/auth";
 
 interface AuthContextValue {
   user: LoginUser | null;
@@ -14,14 +15,29 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<LoginUser | null>(() => authService.getCurrentUser());
-  const [isLoading] = useState(false);
+  const [user, setUser] = useState<LoginUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+
+  useEffect(() => {
+    const syncUser = () => {
+      setUser(authService.getCurrentUser());
+      setIsLoading(false);
+    };
+    syncUser();
+
+    window.addEventListener(SESSION_CHANGED_EVENT, syncUser);
+    window.addEventListener("storage", syncUser);
+    return () => {
+      window.removeEventListener(SESSION_CHANGED_EVENT, syncUser);
+      window.removeEventListener("storage", syncUser);
+    };
+  }, []);
 
   const logout = () => {
     authService.logout();
     setUser(null);
-    router.push('/login');
+    router.push("/login");
   };
 
   return (

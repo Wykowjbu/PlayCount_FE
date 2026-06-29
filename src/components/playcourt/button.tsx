@@ -17,6 +17,7 @@ interface Ripple {
 export function Button({ variant = 'AppPrimary', children, onClick, className = '', ...props }: ButtonProps) {
   const [ripples, setRipples] = useState<Ripple[]>([]);
   const buttonRef = React.useRef<HTMLButtonElement>(null);
+  const rippleIdRef = React.useRef(0);
 
   const handlePointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
     if (variant !== 'CommitPrimary') return;
@@ -29,7 +30,7 @@ export function Button({ variant = 'AppPrimary', children, onClick, className = 
     const y = e.clientY - rect.top;
 
     const newRipple = {
-      id: Date.now() + Math.random(),
+      id: ++rippleIdRef.current,
       x,
       y,
       size,

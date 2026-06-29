@@ -45,9 +45,17 @@ export type LoginResponse = {
   user?: LoginUser | null;
 };
 
+export type UserStatus = string | number;
 export type VenueStatus = 0 | 1 | 2 | 3;
 export type CourtStatus = 0 | 1 | 2;
+export type BookingStatusCode = 0 | 1 | 2 | 3 | 4;
+export type BookingStatus = string;
+export type MatchStatus = string;
+export type MatchJoinRequestStatus = "Pending" | "Approved" | "Rejected" | string;
+export type MatchInvitationStatus = "Pending" | "Accepted" | "Declined" | string;
+export type ReviewStatus = 0 | 1 | 2;
 export type CourtOwnerVerificationStatus = 0 | 1 | 2;
+export type VenueStaffRole = 0 | 1 | 2;
 
 export type Sport = {
   id: number;
@@ -150,6 +158,188 @@ export type CourtOwner = {
   rejectionReason?: string | null;
 };
 
+export type Booking = {
+  id: number;
+  userProfileId: number;
+  playerName: string;
+  courtId: number;
+  courtName: string;
+  venueId: number;
+  venueName: string;
+  startAt: string;
+  endAt: string;
+  totalPrice: number;
+  platformFee: number;
+  ownerEarnings: number;
+  status: BookingStatus;
+  note?: string | null;
+  createdAt: string;
+  updatedAt?: string | null;
+};
+
+export type BookingAvailability = {
+  courtId: number;
+  startAt: string;
+  endAt: string;
+  isAvailable: boolean;
+  estimatedPrice?: number | null;
+  reason?: string | null;
+};
+
+export type BookingFilters = {
+  Status?: BookingStatusCode;
+  From?: string;
+  To?: string;
+  Page?: number;
+  PageSize?: number;
+};
+
+export type Match = {
+  id: number;
+  hostProfileId: number;
+  hostName: string;
+  hostAvatarUrl?: string | null;
+  sportId: number;
+  sportCode: string;
+  sportName: string;
+  courtId?: number | null;
+  courtName?: string | null;
+  venueName?: string | null;
+  locationDescription?: string | null;
+  startAt: string;
+  endAt: string;
+  requiredSkillLevelMin?: string | null;
+  requiredSkillLevelMax?: string | null;
+  maxParticipants: number;
+  participantCount: number;
+  availableSlots: number;
+  costDescription?: string | null;
+  description?: string | null;
+  status: MatchStatus;
+  isHost: boolean;
+  isParticipant: boolean;
+  myJoinRequestStatus?: MatchJoinRequestStatus | null;
+  createdAt: string;
+};
+
+export type MatchParticipant = {
+  profileId: number;
+  fullName: string;
+  avatarUrl?: string | null;
+  skillLevel?: string | null;
+  isHost: boolean;
+  joinedAt: string;
+};
+
+export type MatchDetail = {
+  match: Match;
+  participants: MatchParticipant[];
+};
+
+export type MatchJoinRequest = {
+  id: number;
+  matchId: number;
+  playerProfileId: number;
+  playerName: string;
+  playerAvatarUrl?: string | null;
+  skillLevel?: string | null;
+  status: MatchJoinRequestStatus;
+  requestedAt: string;
+  respondedAt?: string | null;
+};
+
+export type MatchInvitation = {
+  id: number;
+  matchId: number;
+  sportName: string;
+  matchStartAt: string;
+  inviterProfileId: number;
+  inviterName: string;
+  inviteeProfileId: number;
+  inviteeName: string;
+  message?: string | null;
+  status: MatchInvitationStatus;
+  invitedAt: string;
+  respondedAt?: string | null;
+};
+
+export type PlayerMatchCandidate = {
+  profileId: number;
+  fullName: string;
+  avatarUrl?: string | null;
+  city?: string | null;
+  skillLevel: string;
+  matchScore: number;
+};
+
+export type MatchFilters = {
+  SportId?: number;
+  SkillLevel?: number;
+  Location?: string;
+  StartFrom?: string;
+  StartTo?: string;
+  IncludeFull?: boolean;
+  PageIndex?: number;
+  PageSize?: number;
+};
+
+export type CreateMatchRequest = {
+  sportId: number;
+  courtId?: number | null;
+  locationDescription?: string | null;
+  startAt: string;
+  endAt: string;
+  requiredSkillLevelMin?: number | null;
+  requiredSkillLevelMax?: number | null;
+  maxParticipants: number;
+  costDescription?: string | null;
+  description?: string | null;
+};
+
+export type Review = {
+  id: number;
+  playerId: number;
+  playerName: string;
+  playerAvatar?: string | null;
+  bookingId: number;
+  venueId: number;
+  venueName: string;
+  courtId: number;
+  courtName: string;
+  rating: number;
+  reviewText?: string | null;
+  status: string;
+  createdAt: string;
+  updatedAt?: string | null;
+  images: ReviewImage[];
+};
+
+export type ReviewImage = {
+  id: number;
+  reviewId: number;
+  imageUrl: string;
+  displayOrder: number;
+  createdAt: string;
+};
+
+export type ReviewStats = {
+  averageRating: number;
+  totalReviews: number;
+  ratingDistribution: Record<string, number>;
+};
+
+export type VenueStaff = {
+  id: number;
+  venueId: number;
+  venueName: string;
+  userId: number;
+  fullName: string;
+  email: string;
+  role: string;
+  isActive: boolean;
+  createdAt: string;
+};
+
 export type VenueFilters = {
   Keyword?: string;
   SportId?: number;
@@ -165,6 +355,7 @@ const API_BASE_URL =
 
 const TOKEN_KEY = "access_token";
 const USER_KEY = "user";
+export const SESSION_CHANGED_EVENT = "playcourt-session-changed";
 
 function normalizePath(path: string) {
   return path.startsWith("/") ? path : `/${path}`;
@@ -175,10 +366,16 @@ function getToken() {
   return localStorage.getItem(TOKEN_KEY);
 }
 
+function emitSessionChanged() {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event(SESSION_CHANGED_EVENT));
+}
+
 function clearSession() {
   if (typeof window === "undefined") return;
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
+  emitSessionChanged();
 }
 
 function redirectForAuth(status: number) {
@@ -283,6 +480,7 @@ export function saveSession(login: LoginResponse) {
   if (login.user) {
     localStorage.setItem(USER_KEY, JSON.stringify({ ...login.user, role: normalizeRole(login.user.role) }));
   }
+  emitSessionChanged();
 }
 
 export function getStoredUser(): LoginUser | null {
@@ -305,7 +503,7 @@ export const api = {
       email: string;
       phoneNumber: string;
       password: string;
-      role: "Player" | "Owner";
+      role: "Player" | "CourtOwner";
       businessName: string | null;
     }) {
       return apiRequest<ApiResponse<unknown>>("/api/Auth/register", {
@@ -424,6 +622,84 @@ export const api = {
     detail: (id: string | number) => apiRequest<ApiResponse<CourtOwner>>(`/api/court-owners/${id}`),
     updateStatus: (id: string | number, body: { verificationStatus: CourtOwnerVerificationStatus; rejectionReason?: string | null }) =>
       apiRequest<ApiResponse<CourtOwner>>(`/api/court-owners/${id}/verification-status`, { method: "PATCH", body: JSON.stringify(body) }),
+  },
+  bookings: {
+    create: (body: { courtId: number; startAt: string; endAt: string; note?: string | null }) =>
+      apiRequest<ApiResponse<Booking>>("/api/Bookings", { method: "POST", body: JSON.stringify(body) }),
+    detail: (id: string | number) => apiRequest<ApiResponse<Booking>>(`/api/Bookings/${id}`),
+    me: (filters: BookingFilters = {}) => apiRequest<PagedResponse<Booking>>(`/api/Bookings/me${toQuery(filters)}`),
+    venue: (venueId: string | number, filters: BookingFilters = {}) =>
+      apiRequest<PagedResponse<Booking>>(`/api/venues/${venueId}/bookings${toQuery(filters)}`),
+    court: (courtId: string | number, filters: BookingFilters = {}) =>
+      apiRequest<PagedResponse<Booking>>(`/api/courts/${courtId}/bookings${toQuery(filters)}`),
+    availability: (courtId: string | number, body: { startAt: string; endAt: string }) =>
+      apiRequest<ApiResponse<BookingAvailability>>(
+        `/api/courts/${courtId}/availability${toQuery({ StartAt: body.startAt, EndAt: body.endAt })}`,
+      ),
+    cancel: (id: string | number, reason?: string | null) =>
+      apiRequest<ApiResponse<Booking>>(`/api/Bookings/${id}/cancel`, { method: "PATCH", body: JSON.stringify({ reason: reason || null }) }),
+    confirm: (id: string | number, reason?: string | null) =>
+      apiRequest<ApiResponse<Booking>>(`/api/Bookings/${id}/confirm`, { method: "PATCH", body: JSON.stringify({ reason: reason || null }) }),
+    reject: (id: string | number, reason?: string | null) =>
+      apiRequest<ApiResponse<Booking>>(`/api/Bookings/${id}/reject`, { method: "PATCH", body: JSON.stringify({ reason: reason || null }) }),
+    complete: (id: string | number, reason?: string | null) =>
+      apiRequest<ApiResponse<Booking>>(`/api/Bookings/${id}/complete`, { method: "PATCH", body: JSON.stringify({ reason: reason || null }) }),
+  },
+  matches: {
+    search: (filters: MatchFilters = {}) => apiRequest<PagedResponse<Match>>(`/api/Matches${toQuery(filters)}`),
+    recommended: (limit = 20) => apiRequest<ApiResponse<Match[]>>(`/api/Matches/recommended${toQuery({ limit })}`),
+    detail: (id: string | number) => apiRequest<ApiResponse<MatchDetail>>(`/api/Matches/${id}`),
+    create: (body: CreateMatchRequest) => apiRequest<ApiResponse<Match>>("/api/Matches", { method: "POST", body: JSON.stringify(body) }),
+    update: (id: string | number, body: CreateMatchRequest) =>
+      apiRequest<ApiResponse<Match>>(`/api/Matches/${id}`, { method: "PUT", body: JSON.stringify(body) }),
+    cancel: (id: string | number) => apiRequest<ApiResponse<unknown>>(`/api/Matches/${id}`, { method: "DELETE" }),
+    requestToJoin: (id: string | number) => apiRequest<ApiResponse<unknown>>(`/api/Matches/${id}/join-requests`, { method: "POST" }),
+    cancelJoinRequest: (id: string | number) => apiRequest<ApiResponse<unknown>>(`/api/Matches/${id}/join-requests/me`, { method: "DELETE" }),
+    joinRequests: (id: string | number) => apiRequest<ApiResponse<MatchJoinRequest[]>>(`/api/Matches/${id}/join-requests`),
+    respondJoinRequest: (id: string | number, requestId: string | number, status: "Approved" | "Rejected") =>
+      apiRequest<ApiResponse<MatchJoinRequest>>(`/api/Matches/${id}/join-requests/${requestId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status }),
+      }),
+    leave: (id: string | number) => apiRequest<ApiResponse<unknown>>(`/api/Matches/${id}/participants/me`, { method: "DELETE" }),
+    candidates: (id: string | number, limit = 20) =>
+      apiRequest<ApiResponse<PlayerMatchCandidate[]>>(`/api/Matches/${id}/candidates${toQuery({ limit })}`),
+    invite: (id: string | number, body: { inviteeProfileId: number; message?: string | null }) =>
+      apiRequest<ApiResponse<MatchInvitation>>(`/api/Matches/${id}/invitations`, { method: "POST", body: JSON.stringify(body) }),
+    invitations: () => apiRequest<ApiResponse<MatchInvitation[]>>("/api/Matches/invitations/me"),
+    respondInvitation: (invitationId: string | number, status: "Accepted" | "Declined") =>
+      apiRequest<ApiResponse<MatchInvitation>>(`/api/Matches/invitations/${invitationId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status }),
+      }),
+  },
+  reviews: {
+    create: (body: { bookingId: number; rating: number; reviewText?: string | null; imageUrls?: string[] | null }) =>
+      apiRequest<ApiResponse<Review>>("/api/Reviews", { method: "POST", body: JSON.stringify(body) }),
+    venue: (venueId: string | number, page = 1, pageSize = 10) =>
+      apiRequest<PagedResponse<Review>>(`/api/venues/${venueId}/reviews${toQuery({ page, pageSize })}`),
+    court: (courtId: string | number, page = 1, pageSize = 10) =>
+      apiRequest<PagedResponse<Review>>(`/api/courts/${courtId}/reviews${toQuery({ page, pageSize })}`),
+    update: (id: string | number, body: { rating: number; reviewText?: string | null }) =>
+      apiRequest<ApiResponse<Review>>(`/api/Reviews/${id}`, { method: "PUT", body: JSON.stringify(body) }),
+    delete: (id: string | number) => apiRequest<ApiResponse<unknown>>(`/api/Reviews/${id}`, { method: "DELETE" }),
+    report: (id: string | number) => apiRequest<ApiResponse<unknown>>(`/api/Reviews/${id}/report`, { method: "POST" }),
+    moderate: (id: string | number, status: ReviewStatus) =>
+      apiRequest<ApiResponse<Review>>(`/api/admin/reviews/${id}/moderate${toQuery({ status })}`, { method: "PUT" }),
+    addImage: (id: string | number, body: { imageUrl: string; displayOrder: number }) =>
+      apiRequest<ApiResponse<unknown>>(`/api/Reviews/${id}/images`, { method: "POST", body: JSON.stringify(body) }),
+    deleteImage: (id: string | number, imageId: string | number) =>
+      apiRequest<ApiResponse<unknown>>(`/api/Reviews/${id}/images/${imageId}`, { method: "DELETE" }),
+    venueStats: (venueId: string | number) => apiRequest<ApiResponse<ReviewStats>>(`/api/venues/${venueId}/rating-stats`),
+    courtStats: (courtId: string | number) => apiRequest<ApiResponse<ReviewStats>>(`/api/courts/${courtId}/rating-stats`),
+    my: (page = 1, pageSize = 10) => apiRequest<PagedResponse<Review>>(`/api/Reviews/my${toQuery({ page, pageSize })}`),
+  },
+  venueStaff: {
+    list: (venueId: string | number) => apiRequest<ApiResponse<VenueStaff[]>>(`/api/venues/${venueId}/staff`),
+    add: (venueId: string | number, body: { email: string; role: VenueStaffRole }) =>
+      apiRequest<ApiResponse<VenueStaff>>(`/api/venues/${venueId}/staff`, { method: "POST", body: JSON.stringify(body) }),
+    remove: (venueId: string | number, staffId: string | number) =>
+      apiRequest<ApiResponse<unknown>>(`/api/venues/${venueId}/staff/${staffId}`, { method: "DELETE" }),
   },
 };
 

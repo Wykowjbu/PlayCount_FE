@@ -75,29 +75,34 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[var(--pc-canvas)]">
-      <section className="relative overflow-hidden bg-gradient-to-br from-zinc-950 via-green-950 to-black py-20 px-6 md:px-12 text-center flex flex-col items-center justify-center border-b border-[var(--pc-hairline)] min-h-[460px]">
+      <section className="relative flex min-h-[460px] flex-col items-center justify-center overflow-hidden border-b border-[var(--pc-green-100)] bg-[linear-gradient(135deg,#f7fff4_0%,#eefbea_42%,#fff8d8_100%)] px-6 py-20 text-center md:px-12">
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 opacity-45 [background-image:linear-gradient(rgba(20,83,45,0.10)_1px,transparent_1px),linear-gradient(90deg,rgba(20,83,45,0.10)_1px,transparent_1px)] [background-size:52px_52px]"
+        />
+        <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-white/70 to-transparent" />
         <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center gap-6">
-          <h1 className="text-4xl md:text-6xl font-bold text-white font-sans leading-tight">
-            Tìm sân đấu. <span className="text-[var(--pc-tennis)]">Kết nối đồng đội.</span>
+          <h1 className="text-4xl md:text-6xl font-bold text-[var(--pc-green-950)] font-sans leading-tight">
+            Tìm sân đấu. <span className="rounded-[8px] bg-[var(--pc-tennis)]/70 px-2 text-[var(--pc-green-900)]">Kết nối đồng đội.</span>
           </h1>
-          <p className="max-w-2xl text-sm md:text-base text-zinc-400 font-medium">
+          <p className="max-w-2xl text-sm md:text-base text-[var(--pc-body)] font-medium">
             Tìm kiếm sân thể thao bằng dữ liệu thật từ PlayCourt Backend.
           </p>
-          <form onSubmit={handleSearchSubmit} className="w-full max-w-4xl mt-8 p-4 md:p-6 backdrop-blur-md bg-white/10 border border-white/15 shadow-2xl rounded-xl flex flex-col md:flex-row gap-4 items-end text-left">
+          <form onSubmit={handleSearchSubmit} className="w-full max-w-4xl mt-8 p-4 md:p-6 backdrop-blur-md bg-white/85 border border-[var(--pc-green-100)] shadow-[0_24px_70px_rgba(22,101,52,0.14)] rounded-xl flex flex-col md:flex-row gap-4 items-end text-left">
             <div className="w-full flex-grow">
-              <label className="text-[10px] font-mono font-bold tracking-wider text-zinc-400 select-none uppercase block mb-1.5">Từ khóa/khu vực</label>
-              <Input placeholder="Tên sân, địa chỉ..." value={location} onChange={(e) => setLocation(e.target.value)} className="bg-zinc-900/60 border-zinc-700/50 text-white placeholder:text-zinc-500 focus-visible:ring-[var(--pc-green-600)] w-full h-[38px] text-sm" />
+              <label className="text-[10px] font-mono font-bold tracking-wider text-[var(--pc-green-800)] select-none uppercase block mb-1.5">Từ khóa/khu vực</label>
+              <Input placeholder="Tên sân, địa chỉ..." value={location} onChange={(e) => setLocation(e.target.value)} className="bg-white border-[var(--pc-green-100)] text-[var(--pc-ink)] placeholder:text-[var(--pc-mute)] focus-visible:ring-[var(--pc-green-600)] w-full h-[38px] text-sm" />
             </div>
             <div className="w-full md:w-52 flex flex-col">
-              <label className="text-[10px] font-mono font-bold tracking-wider text-zinc-400 select-none uppercase block mb-1.5">Môn thể thao</label>
-              <select value={sport} onChange={(e) => setSport(e.target.value)} className="w-full px-3 py-2 text-sm bg-zinc-900/60 border border-zinc-700/50 rounded-[6px] text-white outline-none focus-visible:ring-2 focus-visible:ring-[var(--pc-green-600)] transition-all cursor-pointer h-[38px]">
-                {sportOptions.map((s) => <option key={s.id || "all"} value={s.id} className="bg-zinc-950 text-white">{s.name}</option>)}
+              <label className="text-[10px] font-mono font-bold tracking-wider text-[var(--pc-green-800)] select-none uppercase block mb-1.5">Môn thể thao</label>
+              <select value={sport} onChange={(e) => setSport(e.target.value)} className="w-full px-3 py-2 text-sm bg-white border border-[var(--pc-green-100)] rounded-[6px] text-[var(--pc-ink)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--pc-green-600)] transition-all cursor-pointer h-[38px]">
+                {sportOptions.map((s) => <option key={s.id || "all"} value={s.id}>{s.name}</option>)}
               </select>
             </div>
             <div className="w-full md:w-56">
-              <DatePicker selectedDate={date} onChange={setDate} placeholder="Chọn ngày" label="Ngày thi đấu" className="[&>button]:bg-zinc-900/60 [&>button]:border-zinc-700/50 [&>button]:text-white [&>button]:h-[38px] [&>label]:text-zinc-400 [&>label]:font-mono [&>label]:font-bold [&>label]:tracking-wider [&>label]:text-[10px] [&>label]:uppercase [&>label]:mb-1.5" />
+              <DatePicker selectedDate={date} onChange={setDate} placeholder="Chọn ngày" label="Ngày thi đấu" className="[&>button]:bg-white [&>button]:border-[var(--pc-green-100)] [&>button]:text-[var(--pc-ink)] [&>button]:h-[38px] [&>label]:text-[var(--pc-green-800)] [&>label]:font-mono [&>label]:font-bold [&>label]:tracking-wider [&>label]:text-[10px] [&>label]:uppercase [&>label]:mb-1.5" />
             </div>
-            <Button type="submit" variant="AppPrimary" className="w-full md:w-auto h-[38px] px-8 bg-[var(--pc-green-800)] hover:bg-[var(--pc-green-700)] text-white font-bold text-sm shrink-0 rounded-[6px] cursor-pointer">Tìm sân</Button>
+            <Button type="submit" variant="AppPrimary" className="w-full md:w-auto h-[38px] px-8 bg-[var(--pc-green-800)] hover:bg-[var(--pc-green-700)] text-white font-bold text-sm shrink-0 rounded-[6px] shadow-[0_10px_24px_rgba(22,101,52,0.22)] cursor-pointer">Tìm sân</Button>
           </form>
         </div>
       </section>
@@ -110,7 +115,7 @@ export default function HomePage() {
           </div>
           <div className="flex flex-wrap gap-1 bg-[var(--pc-hairline-soft)] p-1 rounded-[8px] border border-[var(--pc-hairline)] self-start md:self-auto">
             {sportOptions.map((s) => (
-              <button key={s.id || "all"} onClick={() => handlePopularSportClick(s.id)} className={`px-3 py-1 text-xs font-bold rounded-[6px] transition-all cursor-pointer ${activeSportTab === s.id ? "bg-white text-[var(--pc-green-800)] shadow-sm" : "text-[var(--pc-body)] hover:text-[var(--pc-ink)]"}`}>
+              <button key={s.id || "all"} onClick={() => handlePopularSportClick(s.id)} className={`px-3 py-1 text-xs font-bold rounded-[6px] transition-all cursor-pointer ${activeSportTab === s.id ? "bg-[var(--pc-tennis)] text-[var(--pc-green-950)] shadow-sm" : "text-[var(--pc-body)] hover:text-[var(--pc-ink)]"}`}>
                 {s.name}
               </button>
             ))}

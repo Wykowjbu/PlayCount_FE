@@ -44,3 +44,7 @@ next-env.d.ts
 .superpowers/
 .cursor/
 .codegraph/
+codex-fe.err.log
+codex-fe.out.log
+dev-server.err.log
+dev-server.out.log

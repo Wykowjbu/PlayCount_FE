@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { StatusBadge, StatusType } from '../playcourt/status-badge';
+import { StatusBadge } from '../playcourt/status-badge';
 
 export interface BookingEvent {
   id: string;
@@ -10,7 +10,7 @@ export interface BookingEvent {
   title: string;
   startTime: string; // HH:mm format
   endTime: string;   // HH:mm format
-  status: StatusType;
+  status: string | number;
   userName: string;
   userPhone?: string;
   price?: number;
@@ -32,7 +32,6 @@ export interface ResourceCalendarProps {
 export function ResourceCalendar({
   courts,
   bookings,
-  selectedDate = new Date(),
   onEventClick,
   onSlotClick,
 }: ResourceCalendarProps) {
@@ -101,7 +100,7 @@ export function ResourceCalendar({
                 style={{ minHeight: (hours.length * hourHeight) + "px" }}
               >
                 {/* Background Grid Cells for clicking */}
-                {hours.map((hour, idx) => {
+                {hours.map((hour) => {
                   const timeSlot = formatHour(hour);
                   return (
                     <div

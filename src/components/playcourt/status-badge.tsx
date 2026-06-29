@@ -13,14 +13,30 @@ export type StatusType =
   | 'completed';
 
 export interface StatusBadgeProps {
-  status: StatusType;
+  status: StatusType | string | number;
   className?: string;
+}
+
+function normalizeStatus(status: StatusBadgeProps['status']): StatusType {
+  const value = String(status).trim().toLowerCase();
+  if (['approved', 'active', 'confirmed', 'open'].includes(value)) return 'confirmed';
+  if (['paid', 'accepted'].includes(value)) return 'paid';
+  if (['verified'].includes(value)) return 'verified';
+  if (['pending', 'pendingapproval', 'requested'].includes(value)) return 'pending';
+  if (['needs action', 'needsaction'].includes(value)) return 'needs action';
+  if (['failed', 'conflict'].includes(value)) return 'failed';
+  if (['rejected', 'declined'].includes(value)) return 'rejected';
+  if (['cancelled', 'canceled', 'cancelledbyplayer', 'cancelledbyowner'].includes(value)) return 'cancelled';
+  if (['draft'].includes(value)) return 'draft';
+  if (['completed', 'complete', 'closed'].includes(value)) return 'completed';
+  return 'draft';
 }
 
 export function StatusBadge({ status, className = '' }: StatusBadgeProps) {
   let badgeClasses = '';
+  const normalized = normalizeStatus(status);
 
-  switch (status) {
+  switch (normalized) {
     case 'confirmed':
     case 'paid':
     case 'verified':
@@ -49,4 +65,3 @@ export function StatusBadge({ status, className = '' }: StatusBadgeProps) {
     </span>
   );
 }
-
