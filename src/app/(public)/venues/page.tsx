@@ -2,7 +2,7 @@
 
 /* eslint-disable react-hooks/set-state-in-effect */
 
-import React, { Suspense, useDeferredValue, useEffect, useMemo, useState } from "react";
+import React, { Suspense, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { List, Map } from "lucide-react";
 import { Button } from "@/components/playcourt/button";
@@ -25,12 +25,16 @@ function VenuesSearchContent() {
   const [isOpenNow, setIsOpenNow] = useState(searchParams.get("IsOpenNow") ?? "");
   const [pageIndex, setPageIndex] = useState(Number(searchParams.get("PageIndex") ?? "1") || 1);
   const [pageSize] = useState(12);
+  const [sortBy, setSortBy] = useState("best");
   const [sports, setSports] = useState<Sport[]>([]);
   const [venues, setVenues] = useState<Venue[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [hasAvailability, setHasAvailability] = useState(false);
+  const [timeFilters, setTimeFilters] = useState<string[]>([]);
+  const resultsRef = useRef<HTMLElement>(null);
 
   // Sync state from URL when it changes (e.g. browser Back/Forward)
   useEffect(() => {
@@ -90,6 +94,8 @@ function VenuesSearchContent() {
     setSportId("");
     setDate(undefined);
     setIsOpenNow("");
+    setHasAvailability(false);
+    setTimeFilters([]);
     setPageIndex(1);
   };
 
@@ -98,9 +104,22 @@ function VenuesSearchContent() {
     setPageIndex(1);
   };
 
+  const scrollToResults = () => {
+    requestAnimationFrame(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  };
+
+  const toggleTimeFilter = (value: string) => {
+    setTimeFilters((current) => current.includes(value) ? current.filter((item) => item !== value) : [...current, value]);
+  };
+
   const sportOptions = [
     { value: "all", label: "Tất cả" },
     ...sports.map((sport) => ({ value: String(sport.id), label: sport.name })),
+  ];
+  const sortOptions = [
+    { value: "best", label: "Phù hợp nhất" },
+    { value: "rating", label: "Đánh giá cao nhất" },
+    { value: "near", label: "Gần nhất" },
   ];
 
   return (
@@ -136,6 +155,7 @@ function VenuesSearchContent() {
           onSubmit={(event) => {
             event.preventDefault();
             setPageIndex(1);
+            scrollToResults();
           }}
           className="flex w-full flex-col items-end gap-4 rounded-xl border border-[var(--pc-green-100)] bg-white/85 p-4 text-left shadow-[0_24px_70px_rgba(22,101,52,0.14)] backdrop-blur-md md:flex-row md:p-6"
         >
@@ -182,7 +202,7 @@ function VenuesSearchContent() {
         </form>
       </section>
 
-      <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-6 py-14 lg:px-8">
+      <main ref={resultsRef} className="mx-auto flex w-full max-w-7xl scroll-mt-20 flex-1 flex-col gap-6 px-6 py-14 lg:px-8">
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
             <h2 className="text-xl font-extrabold tracking-tight text-[var(--pc-ink)] md:text-2xl">Sân thể thao phù hợp</h2>
@@ -203,12 +223,76 @@ function VenuesSearchContent() {
           </div>
         </div>
 
-        <div className="min-w-0">
-          <section>
-            <div className="mb-4 flex items-center justify-between">
+        <div className="grid gap-7 lg:grid-cols-[240px_minmax(0,1fr)]">
+          <aside className="self-start rounded-[12px] bg-white p-5 shadow-[0_18px_50px_rgba(20,36,25,.06)] lg:sticky lg:top-20">
+            <div className="mb-8 flex items-center justify-between">
+              <strong className="text-sm font-bold text-[var(--pc-ink)]">Bộ lọc</strong>
+              <button type="button" onClick={resetFilters} className="text-xs font-bold text-[var(--pc-green-800)] hover:underline">
+                Xóa tất cả
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <section>
+                <h3 className="mb-3 text-xs font-bold text-[var(--pc-ink)]">Môn thể thao</h3>
+                <div className="space-y-3">
+                  <label className="flex items-center gap-2 text-sm text-[var(--pc-body)]">
+                    <input type="checkbox" checked={sportId === ""} onChange={() => changeFilter(setSportId, "")} className="h-3.5 w-3.5 rounded accent-[var(--pc-green-800)]" />
+                    Tất cả môn
+                  </label>
+                  {sports.map((sport) => (
+                    <label key={sport.id} className="flex items-center gap-2 text-sm text-[var(--pc-body)]">
+                      <input type="checkbox" checked={sportId === String(sport.id)} onChange={() => changeFilter(setSportId, String(sport.id))} className="h-3.5 w-3.5 rounded accent-[var(--pc-green-800)]" />
+                      {sport.name}
+                    </label>
+                  ))}
+                </div>
+              </section>
+
+              <section className="border-t border-[var(--pc-hairline)] pt-5">
+                <h3 className="mb-3 text-xs font-bold text-[var(--pc-ink)]">Trạng thái</h3>
+                <div className="space-y-3">
+                  <label className="flex items-center gap-2 text-sm text-[var(--pc-body)]">
+                    <input type="checkbox" checked={isOpenNow === "true"} onChange={(event) => changeFilter(setIsOpenNow, event.target.checked ? "true" : "")} className="h-3.5 w-3.5 rounded accent-[var(--pc-green-800)]" />
+                    Đang mở cửa
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-[var(--pc-body)]">
+                    <input type="checkbox" checked={hasAvailability} onChange={(event) => setHasAvailability(event.target.checked)} className="h-3.5 w-3.5 rounded accent-[var(--pc-green-800)]" />
+                    Có lịch trống
+                  </label>
+                </div>
+              </section>
+
+              <section className="border-t border-[var(--pc-hairline)] pt-5">
+                <h3 className="mb-3 text-xs font-bold text-[var(--pc-ink)]">Khung giờ</h3>
+                <div className="space-y-3">
+                  {[
+                    ["morning", "Buổi sáng"],
+                    ["afternoon", "Buổi chiều"],
+                    ["evening", "Buổi tối"],
+                  ].map(([value, label]) => (
+                    <label key={value} className="flex items-center gap-2 text-sm text-[var(--pc-body)]">
+                      <input type="checkbox" checked={timeFilters.includes(value)} onChange={() => toggleTimeFilter(value)} className="h-3.5 w-3.5 rounded accent-[var(--pc-green-800)]" />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+              </section>
+            </div>
+          </aside>
+
+          <section className="min-w-0">
+            <div className="mb-4 flex items-center justify-between gap-3">
               <span className="text-xs font-black uppercase tracking-wider text-[var(--pc-mute)]">
                 {loading ? "Đang tải" : `Tìm thấy ${totalCount} sân`}
               </span>
+              <Select
+                value={sortBy}
+                onValueChange={setSortBy}
+                options={sortOptions}
+                placeholder="Sắp xếp"
+                className="w-44 [&>button]:shadow-sm"
+              />
             </div>
 
             {loading ? (
