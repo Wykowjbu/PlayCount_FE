@@ -6,6 +6,10 @@
   --foreground: var(--pc-ink);
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

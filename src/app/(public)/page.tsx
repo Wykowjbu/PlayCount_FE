@@ -174,6 +174,7 @@ export default function HomePage() {
   };
 
   const shouldReduceMotion = useReducedMotion();
+  const showInitialVenuesLoading = venuesLoading && venues.length === 0;
 
   const pillTransition = shouldReduceMotion
     ? { duration: 0 }
@@ -385,18 +386,6 @@ export default function HomePage() {
                     <button
                       key={id}
                       type="button"
-                      ref={(el) => {
-                        if (isActive && el) {
-                          // Scroll active chip into view with a small delay for layout settle
-                          requestAnimationFrame(() => {
-                            el.scrollIntoView({
-                              behavior: shouldReduceMotion ? "auto" : "smooth",
-                              block: "nearest",
-                              inline: "center",
-                            });
-                          });
-                        }
-                      }}
                       onClick={() => handleSportTabClick(id)}
                       className="relative isolate shrink-0 px-3 py-1.5 text-xs font-bold rounded-[6px] cursor-pointer border border-[var(--pc-hairline)] bg-[var(--pc-hairline-soft)] text-[var(--pc-body)] hover:text-[var(--pc-ink)] transition-colors duration-150"
                       aria-pressed={isActive}
@@ -417,8 +406,9 @@ export default function HomePage() {
           )}
         </div>
 
+        <div className="relative min-h-[280px]">
         {/* Loading skeleton */}
-        {venuesLoading ? (
+        {showInitialVenuesLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6" aria-busy="true">
             {[1, 2, 3].map((i) => (
               <div key={i} className="rounded-[12px] border border-[var(--pc-hairline)] bg-white overflow-hidden" aria-hidden="true">
@@ -432,7 +422,7 @@ export default function HomePage() {
               </div>
             ))}
           </div>
-        ) : venuesError ? (
+        ) : venuesError && venues.length === 0 ? (
           /* Error state */
           <div
             className="rounded-[12px] border border-red-200 bg-red-50 p-8 text-center"
@@ -452,7 +442,7 @@ export default function HomePage() {
           </div>
         ) : venues.length > 0 ? (
           /* Venue grid */
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className={`grid grid-cols-1 md:grid-cols-3 gap-6 transition-opacity duration-150 ${venuesLoading ? "opacity-70" : "opacity-100"}`} aria-busy={venuesLoading}>
             {venues.map((venue) => (
               <VenueCard
                 key={venue.id}
@@ -485,6 +475,7 @@ export default function HomePage() {
             )}
           </div>
         )}
+        </div>
       </section>
     </div>
   );
