@@ -37,7 +37,7 @@ export function PlayerHeader() {
 
   return (
     <Tooltip.Provider>
-      <header data-testid="player-header" className="sticky top-0 z-50 h-16 w-full border-b border-[var(--pc-hairline)] bg-[var(--pc-canvas)]/92 backdrop-blur-md transition-colors duration-200">
+      <header data-testid="player-header" className="sticky top-0 z-50 h-16 w-full border-b border-transparent bg-white/70 backdrop-blur-md transition-colors duration-200">
         <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
           {/* Logo */}
@@ -55,14 +55,11 @@ export function PlayerHeader() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`relative py-5 text-sm font-medium transition-colors hover:text-[var(--pc-ink)] ${
-                      isActive ? "text-[var(--pc-ink)]" : "text-[var(--pc-mute)]"
+                    className={`relative py-5 text-sm font-semibold transition-all after:absolute after:bottom-3 after:left-0 after:h-0.5 after:w-full after:origin-center after:rounded-full after:bg-[var(--pc-tennis)] after:transition-transform after:duration-200 hover:-translate-y-px hover:text-[var(--pc-ink)] ${
+                      isActive ? "text-[var(--pc-ink)] after:scale-x-100" : "text-[var(--pc-mute)] after:scale-x-0 hover:after:scale-x-100"
                     }`}
                   >
                     {link.name}
-                    {isActive && (
-                      <span className="absolute bottom-0 left-0 h-0.5 w-full bg-[var(--pc-tennis)]" />
-                    )}
                   </Link>
                 );
               })}
