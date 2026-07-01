@@ -25,11 +25,12 @@ export function OwnerSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selectedVenue, setSelectedVenue] = useState("");
   const user = authService.getCurrentUser();
+  const isOwner = user?.role === "CourtOwner";
 
   const venuesQuery = useQuery({
     queryKey: ["venues", "my-sidebar"],
     queryFn: () => api.venues.my(),
-    enabled: !!(user?.role === "CourtOwner" || user?.role === "Admin"),
+    enabled: isOwner,
   });
   const venues = venuesQuery.data?.data ?? [];
 

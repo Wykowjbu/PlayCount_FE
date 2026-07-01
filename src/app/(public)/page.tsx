@@ -51,7 +51,7 @@ export default function HomePage() {
       } catch (err) {
         if (!mountedRef.current) return;
         if (err instanceof DOMException && err.name === "AbortError") return;
-        setSportsError("Không thể tải danh sách môn thể thao.");
+        setSportsError(err instanceof Error ? err.message : "Không thể tải danh sách môn thể thao.");
         setSports([]);
       } finally {
         if (mountedRef.current) setSportsLoading(false);
@@ -101,7 +101,7 @@ export default function HomePage() {
       if (venuesFetchRef.current?.sportId !== sportId) return;
       if (err instanceof DOMException && err.name === "AbortError") return;
       setVenuesLoading(false);
-      setVenuesError("Không thể tải danh sách sân. Vui lòng thử lại sau.");
+      setVenuesError(err instanceof Error ? err.message : "Không thể tải danh sách sân. Vui lòng thử lại sau.");
     }
   }, []);
 
@@ -439,9 +439,7 @@ export default function HomePage() {
             role="alert"
           >
             <p className="text-sm font-semibold text-red-800">
-              {activeSportTab
-                ? "Không thể tải sân cho môn đã chọn."
-                : "Không thể tải danh sách sân."}
+              {venuesError}
             </p>
             <p className="text-xs text-red-600 mt-1">Vui lòng thử lại sau.</p>
             <Button
