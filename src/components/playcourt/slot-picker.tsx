@@ -102,7 +102,7 @@ export function SlotPicker({
                         isBusy
                           ? "bg-[var(--pc-hairline-soft)] text-[var(--pc-mute)] border border-[var(--pc-hairline)] cursor-not-allowed bg-[repeating-linear-gradient(45deg,var(--pc-hairline-soft),var(--pc-hairline-soft)_6px,var(--pc-hairline)_6px,var(--pc-hairline)_12px)] opacity-60"
                           : isSelected
-                          ? "bg-[var(--pc-green-800)] text-white font-bold border border-[var(--pc-green-900)] cursor-pointer shadow-xs"
+                          ? "bg-[var(--pc-tennis)]/70 text-[var(--pc-green-950)] font-bold border border-[#e4d55a] cursor-pointer shadow-xs"
                           : "bg-white text-[var(--pc-body)] hover:bg-[var(--pc-green-50)] hover:text-[var(--pc-green-800)] border border-[var(--pc-hairline)] hover:border-[var(--pc-green-200)] cursor-pointer"
                       }`}
                     >
@@ -140,7 +140,7 @@ export function SlotPicker({
             <Button
               variant="AppPrimary"
               onClick={onContinue}
-              className="bg-[var(--pc-green-800)] hover:bg-[var(--pc-green-700)] text-white font-bold px-6 py-2 rounded-[6px] cursor-pointer text-xs"
+              className="bg-[var(--pc-tennis)]/70 hover:bg-[var(--pc-tennis)] text-[var(--pc-green-950)] font-bold px-6 py-2 rounded-[6px] cursor-pointer text-xs"
             >
               Tiếp tục
             </Button>

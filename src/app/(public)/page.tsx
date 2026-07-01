@@ -239,7 +239,7 @@ export default function HomePage() {
             <Button
               type="submit"
               variant="AppPrimary"
-              className="w-full md:w-auto h-[38px] px-8 bg-[var(--pc-green-800)] hover:bg-[var(--pc-green-700)] text-white font-bold text-sm shrink-0 rounded-[6px] shadow-[0_10px_24px_rgba(22,101,52,0.22)] cursor-pointer"
+              className="w-full md:w-auto h-[38px] px-8 bg-[var(--pc-tennis)]/70 hover:bg-[var(--pc-tennis)] text-[var(--pc-green-950)] font-bold text-sm shrink-0 rounded-[6px] shadow-[0_10px_24px_rgba(22,101,52,0.16)] cursor-pointer"
             >
               Tìm sân
             </Button>

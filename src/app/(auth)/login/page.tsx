@@ -127,7 +127,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full min-h-12 bg-green-900 text-white font-medium rounded-md hover:bg-green-950 active:translate-y-px transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full min-h-12 border border-[#e4d55a] bg-[var(--pc-tennis)]/70 text-[var(--pc-green-950)] font-medium rounded-md hover:bg-[var(--pc-tennis)] active:translate-y-px transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
         </button>

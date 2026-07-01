@@ -48,7 +48,7 @@ export function PlayerMobileNav() {
                 <button
                   type="button"
                   onClick={() => setIsOpen(true)}
-                  className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--pc-green-800)] text-white shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)] transition-transform hover:scale-105 active:scale-95 cursor-pointer"
+                  className="flex h-12 w-12 items-center justify-center rounded-full border border-[#e4d55a] bg-[var(--pc-tennis)]/70 text-[var(--pc-green-950)] shadow-[0_2px_2px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.08)] transition-transform hover:scale-105 hover:bg-[var(--pc-tennis)] active:scale-95 cursor-pointer"
                   aria-label="Tạo mới nhanh"
                 >
                   <span className="text-2xl font-light leading-none">+</span>

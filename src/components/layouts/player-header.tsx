@@ -37,7 +37,7 @@ export function PlayerHeader() {
 
   return (
     <Tooltip.Provider>
-      <header data-testid="player-header" className="sticky top-0 z-50 h-16 w-full border-b border-[var(--pc-hairline)] bg-[var(--pc-canvas)]/92 backdrop-blur-md transition-colors duration-200">
+      <header data-testid="player-header" className="sticky top-0 z-50 h-16 w-full bg-transparent backdrop-blur-md transition-colors duration-200">
         <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
           {/* Logo */}
@@ -60,9 +60,7 @@ export function PlayerHeader() {
                     }`}
                   >
                     {link.name}
-                    {isActive && (
-                      <span className="absolute bottom-0 left-0 h-0.5 w-full bg-[var(--pc-tennis)]" />
-                    )}
+                    {isActive && <span className="absolute -bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-[var(--pc-tennis)]" />}
                   </Link>
                 );
               })}

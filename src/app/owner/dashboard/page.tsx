@@ -62,7 +62,7 @@ export default function OwnerDashboard() {
             <h2 className="font-semibold text-[var(--pc-ink)]">Venue của tôi</h2>
             <p className="mt-1 text-sm text-[var(--pc-mute)]">Quản lý venue, ảnh, tiện ích, giờ mở cửa, court, pricing rule và schedule.</p>
           </div>
-          <Link className="inline-flex items-center gap-2 rounded-[6px] bg-[var(--pc-green-800)] px-4 py-2 text-sm font-semibold text-white" href="/owner/venues">
+          <Link className="inline-flex items-center gap-2 rounded-[6px] border border-[#e4d55a] bg-[var(--pc-tennis)]/70 px-4 py-2 text-sm font-semibold text-[var(--pc-green-950)] hover:bg-[var(--pc-tennis)]" href="/owner/venues">
             <MapPin className="h-4 w-4" /> Mở quản lý
           </Link>
         </div>

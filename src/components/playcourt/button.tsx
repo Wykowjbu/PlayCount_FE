@@ -46,13 +46,13 @@ export function Button({ variant = 'AppPrimary', children, onClick, className = 
   let variantClasses = '';
   switch (variant) {
     case 'MarketingPrimary':
-      variantClasses = 'rounded-full bg-[var(--pc-ink)] text-white hover:bg-neutral-800 active:scale-[0.98] transition-all';
+      variantClasses = 'rounded-full border border-[#e4d55a] bg-[var(--pc-tennis)]/70 text-[var(--pc-green-950)] hover:bg-[var(--pc-tennis)] active:scale-[0.98] transition-all';
       break;
     case 'AppPrimary':
-      variantClasses = 'rounded-[6px] bg-[var(--pc-green-800)] text-white hover:bg-[var(--pc-green-700)] active:scale-[0.98] transition-all';
+      variantClasses = 'rounded-[6px] border border-[#e4d55a] bg-[var(--pc-tennis)]/70 text-[var(--pc-green-950)] hover:bg-[var(--pc-tennis)] active:scale-[0.98] transition-all';
       break;
     case 'CommitPrimary':
-      variantClasses = 'rounded-[6px] bg-[var(--pc-green-800)] text-white hover:bg-[var(--pc-green-700)] relative overflow-hidden active:scale-[0.98] transition-all';
+      variantClasses = 'rounded-[6px] border border-[#e4d55a] bg-[var(--pc-tennis)]/70 text-[var(--pc-green-950)] hover:bg-[var(--pc-tennis)] relative overflow-hidden active:scale-[0.98] transition-all';
       break;
     case 'Secondary':
       variantClasses = 'rounded-[6px] border border-[var(--pc-hairline)] bg-transparent text-[var(--pc-ink)] hover:bg-[var(--pc-hairline-soft)] active:scale-[0.98] transition-all';

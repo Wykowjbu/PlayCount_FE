@@ -124,7 +124,7 @@ export default function ForgotPasswordPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full min-h-12 bg-green-900 text-white font-medium rounded-md hover:bg-green-950 active:translate-y-px transition-all"
+              className="w-full min-h-12 border border-[#e4d55a] bg-[var(--pc-tennis)]/70 text-[var(--pc-green-950)] font-medium rounded-md hover:bg-[var(--pc-tennis)] active:translate-y-px transition-all"
             >
               {isLoading ? 'Đang gửi...' : 'Gửi mã xác thực'}
             </button>
@@ -196,7 +196,7 @@ export default function ForgotPasswordPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full min-h-12 bg-green-900 text-white font-medium rounded-md hover:bg-green-950 active:translate-y-px transition-all"
+              className="w-full min-h-12 border border-[#e4d55a] bg-[var(--pc-tennis)]/70 text-[var(--pc-green-950)] font-medium rounded-md hover:bg-[var(--pc-tennis)] active:translate-y-px transition-all"
             >
               {isLoading ? 'Đang xử lý...' : 'Đặt lại mật khẩu'}
             </button>

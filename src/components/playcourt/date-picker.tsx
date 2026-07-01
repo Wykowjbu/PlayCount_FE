@@ -259,7 +259,7 @@ export function DatePicker({
                         !isCurrentMonth ? "text-[var(--pc-faint)]" : "text-[var(--pc-ink)]"
                       } ${
                         selected
-                          ? "bg-[var(--pc-green-800)] text-white font-bold"
+                          ? "bg-[var(--pc-tennis)]/70 text-[var(--pc-green-950)] font-bold"
                           : today
                           ? "bg-[var(--pc-green-50)] text-[var(--pc-green-800)] font-bold border border-[var(--pc-green-200)]"
                           : "hover:bg-[var(--pc-hairline-soft)]"

@@ -347,7 +347,7 @@ export default function OwnerVenuesPage() {
                     <h2 className="text-lg font-bold text-[var(--pc-ink)]">Staff</h2>
                     <p className="text-sm text-[var(--pc-mute)]">Quản lý staff bằng VenueStaff API.</p>
                   </div>
-                  <Link className="rounded-[6px] bg-[var(--pc-green-800)] px-4 py-2 text-sm font-semibold text-white" href={`/owner/venues/${selectedVenue.id}/staff`}>
+                  <Link className="rounded-[6px] border border-[#e4d55a] bg-[var(--pc-tennis)]/70 px-4 py-2 text-sm font-semibold text-[var(--pc-green-950)] hover:bg-[var(--pc-tennis)]" href={`/owner/venues/${selectedVenue.id}/staff`}>
                     Mở staff
                   </Link>
                 </div>

@@ -64,7 +64,7 @@ export default function MatchesPage() {
           <p className="font-mono text-xs uppercase tracking-[.16em] text-[var(--pc-mute)]">Matchmaking</p>
           <h1 className="mt-2 text-3xl font-semibold text-[var(--pc-ink)]">Tìm trận đấu</h1>
         </div>
-        <Link className="inline-flex rounded-[6px] bg-[var(--pc-green-800)] px-4 py-2 text-sm font-semibold text-white" href="/matches/create">
+        <Link className="inline-flex rounded-[6px] border border-[#e4d55a] bg-[var(--pc-tennis)]/70 px-4 py-2 text-sm font-semibold text-[var(--pc-green-950)] hover:bg-[var(--pc-tennis)]" href="/matches/create">
           Tạo trận
         </Link>
       </div>

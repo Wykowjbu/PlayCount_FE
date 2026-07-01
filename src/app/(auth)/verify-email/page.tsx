@@ -69,7 +69,7 @@ function VerifyEmailContent() {
           OTP
           <input value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" minLength={6} maxLength={6} required className="w-full min-h-[42px] border border-gray-200 rounded-md bg-white px-3 py-2 tracking-[0.4em] outline-none focus:border-green-800" />
         </label>
-        <button disabled={isLoading} className="w-full min-h-12 bg-green-900 text-white font-medium rounded-md disabled:opacity-50">
+        <button disabled={isLoading} className="w-full min-h-12 border border-[#e4d55a] bg-[var(--pc-tennis)]/70 text-[var(--pc-green-950)] font-medium rounded-md hover:bg-[var(--pc-tennis)] disabled:opacity-50">
           {isLoading ? 'Đang xử lý...' : 'Xác minh email'}
         </button>
         <button type="button" onClick={resend} disabled={isLoading || !email} className="text-sm font-medium text-green-800 hover:underline disabled:opacity-50">
